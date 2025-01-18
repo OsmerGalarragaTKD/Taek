@@ -1,6 +1,14 @@
 <?php
 
+use App\Http\Controllers\AthleteController;
+use App\Http\Controllers\BeltGradeController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VenueController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +23,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/payments/pending', [PaymentController::class, 'pending'])->name('payments.pending');
+    Route::post('/payments/{id}/approve', [PaymentController::class, 'approveSingle'])->name('payments.approve.single');
+    Route::post('/payments/approve-bulk', [PaymentController::class, 'approveBulk'])->name('payments.approve.bulk');
+    Route::resource('documents', DocumentController::class);
+    Route::get('/documents/pending', [DocumentController::class, 'pending'])->name('documents.pending');
+    Route::post('/documents/{id}/approve', [DocumentController::class, 'approveSingle'])->name('documents.approve.single');
+    Route::post('/documents/approve-bulk', [DocumentController::class, 'approveBulk'])->name('documents.approve.bulk');
+    Route::post('/documents/{id}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
 });
 
-require __DIR__.'/auth.php';
+Route::resource('/athlete', AthleteController::class)->middleware('auth');
+Route::resource('/categories', CategoryController::class)->middleware('auth');
+Route::resource('/belts', BeltGradeController::class)->middleware('auth');
+Route::resource('/payments', PaymentController::class)->middleware('auth');
+Route::resource('/events', EventController::class)->middleware('auth');
+Route::resource('/venues', VenueController::class)->middleware('auth');
+
+
+// Rutas para pagos pendientes
+
+
+require __DIR__ . '/auth.php';
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

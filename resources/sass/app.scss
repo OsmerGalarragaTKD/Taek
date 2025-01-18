@@ -1,0 +1,28 @@
+// Fonts
+@use 'sass:math';
+@use 'sass:color';
+
+// Variables
+@use 'variables' as vars;
+
+// Bootstrap
+@use 'bootstrap/scss/bootstrap' as *;
+
+// Bootstrap Icons
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+// Custom styles
+.btn-primary {
+    &:hover {
+        background-color: color.adjust(vars.$primary, $lightness: -10%);
+    }
+}
+
+.table {
+    thead {
+        background-color: vars.$light;
+    }
+}
+
+.card {
+    box-shadow: 0 math.div(0.125rem, 1) math.div(0.25rem, 1) rgba(0, 0, 0, 0.075);
+}
