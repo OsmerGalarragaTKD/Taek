@@ -349,6 +349,11 @@ return [
             'icon' => 'fas fa-money-bill',
         ],
         [
+            'text' => 'Pagos Usuarios',
+            'url' => 'payments/user-payment',
+            'icon' => 'fas fa-money-bill',
+        ],
+        [
             'text' => 'Documentos',
             'url' => 'documents',
             'icon' => 'fas fa-file',

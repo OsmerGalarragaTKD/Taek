@@ -40,10 +40,9 @@ class PaymentController extends Controller
             'payment_type' => 'required',
             'payment_method' => 'required',
             'reference_number' => 'nullable',
-            'receipt_url' => 'nullable',
+            'receipt_url' => 'nullable|image|mimes:jpeg,png,jpg|max:20480',
             'notes' => 'nullable',
         ]);
-
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -51,35 +50,51 @@ class PaymentController extends Controller
                 ->withInput();
         }
 
+        try {
+            DB::beginTransaction();
 
+            $receipt_path = null;
 
-       try {
-        DB::beginTransaction();
+            if ($request->hasFile('receipt_url')) {
+                $file = $request->file('receipt_url');
+                $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName()); // Reemplazar espacios con guiones bajos
 
+                // Asegurarse de que el directorio existe
+                $storage_path = storage_path('app/public/receipts');
+                if (!file_exists($storage_path)) {
+                    mkdir($storage_path, 0755, true);
+                }
 
-        Payment::create([
-            'athlete_id' => $request->athlete_id,
-            'amount' => $request->amount,
-            'payment_date' => $request->payment_date,
-            'payment_type' => $request->payment_type,
-            'payment_method' => $request->payment_method,
-            'reference_number' => $request->reference_number,
-            'receipt_url' => $request->receipt_url,
-            'notes' => $request->notes,
-        ]);
+                // Mover el archivo directamente
+                $file->move($storage_path, $filename);
+                $receipt_path = 'receipts/' . $filename;
 
-        DB::commit();
-        return redirect()->route('payments.index')
-            ->with('success', 'Pago registrado exitosamente');
-       } catch (\Exception $e) {
-        DB::rollBack();
+                // Verificar que el archivo se movió correctamente
+                if (!file_exists($storage_path . '/' . $filename)) {
+                    throw new \Exception('Error al guardar el archivo');
+                }
+            }
 
-        \Log::error("Error al registrar pago: " . $e->getMessage());
+            Payment::create([
+                'athlete_id' => $request->athlete_id,
+                'amount' => $request->amount,
+                'payment_date' => $request->payment_date,
+                'payment_type' => $request->payment_type,
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'receipt_url' => $receipt_path,
+                'notes' => $request->notes,
+            ]);
 
-        return redirect()->back()
-            ->with('error', 'Ocurrió un error al registrar el pago');
-
-       }
+            DB::commit();
+            return redirect()->route('payments.index')
+                ->with('success', 'Pago registrado exitosamente');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Error al registrar pago: " . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Ocurrió un error al registrar el pago: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -182,7 +197,7 @@ class PaymentController extends Controller
             'payment_type' => 'required',
             'payment_method' => 'required',
             'reference_number' => 'nullable',
-            'receipt_url' => 'nullable',
+            'receipt_url' => 'nullable|image|mimes:jpeg,png,jpg|max:20480',
             'notes' => 'nullable',
             'status' => 'required|in:Pending,Completed,Cancelled'
         ]);
@@ -197,7 +212,43 @@ class PaymentController extends Controller
             DB::beginTransaction();
 
             $payment = Payment::findOrFail($id);
-            $payment->update($request->all());
+            $receipt_path = $payment->receipt_url; // Mantener la imagen actual por defecto
+
+            if ($request->hasFile('receipt_url')) {
+                // Eliminar la imagen anterior si existe
+                if ($payment->receipt_url && file_exists(storage_path('app/public/' . $payment->receipt_url))) {
+                    unlink(storage_path('app/public/' . $payment->receipt_url));
+                }
+
+                $file = $request->file('receipt_url');
+                $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+
+                // Asegurarse de que el directorio existe
+                $storage_path = storage_path('app/public/receipts');
+                if (!file_exists($storage_path)) {
+                    mkdir($storage_path, 0755, true);
+                }
+
+                // Mover el archivo directamente
+                $file->move($storage_path, $filename);
+                $receipt_path = 'receipts/' . $filename;
+
+                // Verificar que el archivo se movió correctamente
+                if (!file_exists($storage_path . '/' . $filename)) {
+                    throw new \Exception('Error al guardar el archivo');
+                }
+            }
+
+            $payment->update([
+                'amount' => $request->amount,
+                'payment_date' => $request->payment_date,
+                'payment_type' => $request->payment_type,
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'receipt_url' => $receipt_path,
+                'notes' => $request->notes,
+                'status' => $request->status
+            ]);
 
             if ($request->status === 'Completed' && !$payment->completed_at) {
                 $payment->update(['completed_at' => now()]);
@@ -210,7 +261,95 @@ class PaymentController extends Controller
             DB::rollBack();
             \Log::error("Error al actualizar pago: " . $e->getMessage());
             return redirect()->back()
-                ->with('error', 'Ocurrió un error al actualizar el pago');
+                ->with('error', 'Ocurrió un error al actualizar el pago: ' . $e->getMessage());
+        }
+    }
+
+    public function userPayment()
+    {
+        return view('payments.user-payment');
+    }
+
+    public function userStore(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'athlete_id' => 'required',
+            'amount' => 'required|numeric|min:0',
+            'payment_date' => 'required|date',
+            'payment_type' => 'required',
+            'payment_method' => 'required|in:Transfer,Card',
+            'reference_number' => 'required',
+            'receipt_url' => 'required|image|mimes:jpeg,png,jpg|max:20480',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $receipt_path = null;
+
+            if ($request->hasFile('receipt_url')) {
+                $file = $request->file('receipt_url');
+                $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+
+                // Asegurarse de que el directorio existe
+                $storage_path = storage_path('app/public/receipts');
+                if (!file_exists($storage_path)) {
+                    mkdir($storage_path, 0755, true);
+                }
+
+                // Mover el archivo directamente
+                $file->move($storage_path, $filename);
+                $receipt_path = 'receipts/' . $filename;
+
+                // Verificar que el archivo se movió correctamente
+                if (!file_exists($storage_path . '/' . $filename)) {
+                    throw new \Exception('Error al guardar el archivo');
+                }
+            }
+
+            Payment::create([
+                'athlete_id' => $request->athlete_id,
+                'amount' => $request->amount,
+                'payment_date' => $request->payment_date,
+                'payment_type' => $request->payment_type,
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'receipt_url' => $receipt_path,
+                'notes' => $request->notes,
+                'status' => 'Pending', // Los pagos de usuarios comienzan como pendientes
+            ]);
+
+            DB::commit();
+            return redirect()->route('dashboard')
+                ->with('success', 'Pago registrado exitosamente. Será revisado por un administrador.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Error al registrar pago de usuario: " . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Ocurrió un error al registrar el pago: ' . $e->getMessage());
+        }
+    }
+
+    private function checkStorageStructure()
+    {
+        $paths = [
+            storage_path('app/public'),
+            storage_path('app/public/receipts'),
+            public_path('storage'),
+            public_path('storage/receipts')
+        ];
+
+        foreach ($paths as $path) {
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
         }
     }
 

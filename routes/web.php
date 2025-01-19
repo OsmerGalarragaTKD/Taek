@@ -31,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/documents/{id}/approve', [DocumentController::class, 'approveSingle'])->name('documents.approve.single');
     Route::post('/documents/approve-bulk', [DocumentController::class, 'approveBulk'])->name('documents.approve.bulk');
     Route::post('/documents/{id}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
+    Route::get('/payments/user-payment', [PaymentController::class, 'userPayment'])->name('payments.user-payment');
+    Route::post('/payments/user-store', [PaymentController::class, 'userStore'])->name('payments.user-store');
 });
 
 Route::resource('/athlete', AthleteController::class)->middleware('auth');

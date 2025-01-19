@@ -10,39 +10,18 @@
                         <div class="col">
                             <h5 class="mb-0">
                                 <i class="bi bi-cash me-2"></i>
-                                Registrar Nuevo Pago
+                                Registrar Pago
                             </h5>
-                        </div>
-                        <div class="col text-end">
-                            <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>
-                                Volver
-                            </a>
                         </div>
                     </div>
                 </div>
 
                 <div class="card-body">
-                    <form enctype="multipart/form-data" action="{{ route('payments.store') }}" method="POST">
+                    <form action="{{ route('payments.user-store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         
-                        <div class="mb-3">
-                            <label for="athlete_id" class="form-label">Atleta</label>
-                            <select class="form-select @error('athlete_id') is-invalid @enderror" 
-                                    id="athlete_id" name="athlete_id" required>
-                                <option value="">Seleccionar atleta...</option>
-                                @foreach($athletes as $athlete)
-                                    <option value="{{ $athlete->id }}" 
-                                            {{ old('athlete_id') == $athlete->id ? 'selected' : '' }}>
-                                        {{ $athlete->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('athlete_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
+                        {{-- <input type="hidden" name="athlete_id" value="{{ Auth::user()->athlete->id }}"> --}}
+                        
                         <div class="mb-3">
                             <label for="amount" class="form-label">Monto</label>
                             <div class="input-group">
@@ -58,7 +37,7 @@
                         <div class="mb-3">
                             <label for="payment_date" class="form-label">Fecha de Pago</label>
                             <input type="date" class="form-control @error('payment_date') is-invalid @enderror" 
-                                   id="payment_date" name="payment_date" value="{{ old('payment_date') }}" required>
+                                   id="payment_date" name="payment_date" value="{{ old('payment_date', date('Y-m-d')) }}" required>
                             @error('payment_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -87,7 +66,6 @@
                                     <select class="form-select @error('payment_method') is-invalid @enderror" 
                                             id="payment_method" name="payment_method" required>
                                         <option value="">Seleccionar método...</option>
-                                        <option value="Cash" {{ old('payment_method') == 'Cash' ? 'selected' : '' }}>Efectivo</option>
                                         <option value="Transfer" {{ old('payment_method') == 'Transfer' ? 'selected' : '' }}>Transferencia</option>
                                         <option value="Card" {{ old('payment_method') == 'Card' ? 'selected' : '' }}>Tarjeta</option>
                                     </select>
@@ -101,16 +79,16 @@
                         <div class="mb-3">
                             <label for="reference_number" class="form-label">Número de Referencia</label>
                             <input type="text" class="form-control @error('reference_number') is-invalid @enderror" 
-                                   id="reference_number" name="reference_number" value="{{ old('reference_number') }}" >
+                                   id="reference_number" name="reference_number" value="{{ old('reference_number') }}" required>
                             @error('reference_number')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="receipt_url" class="form-label">Recibo</label>
+                            <label for="receipt_url" class="form-label">Imagen de Referencia</label>
                             <input type="file" class="form-control @error('receipt_url') is-invalid @enderror" 
-                                   id="receipt_url" name="receipt_url" accept="image/*">
+                                   id="receipt_url" name="receipt_url" accept="image/*" required>
                             <div class="form-text">Formatos permitidos: JPG, JPEG, PNG. Tamaño máximo: 2MB</div>
                             @error('receipt_url')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -118,7 +96,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="notes" class="form-label">Notas</label>
+                            <label for="notes" class="form-label">Notas o Comentarios</label>
                             <textarea class="form-control @error('notes') is-invalid @enderror" 
                                       id="notes" name="notes" rows="3">{{ old('notes') }}</textarea>
                             @error('notes')
@@ -129,7 +107,7 @@
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save me-1"></i>
-                                Guardar Pago
+                                Enviar Pago
                             </button>
                         </div>
                     </form>

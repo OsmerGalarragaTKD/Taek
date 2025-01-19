@@ -97,7 +97,7 @@
                                             <div class="d-flex flex-column align-items-center">
                                                 <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
                                                 <p class="mb-0 mt-2">No hay atletas registrados</p>
-                                                <a href="{{ route('person.create') }}" class="btn btn-sm btn-primary mt-3">
+                                                <a href="{{ route('athlete.create') }}" class="btn btn-sm btn-primary mt-3">
                                                     <i class="bi bi-plus-circle me-1"></i>
                                                     Crear Nuevo Atleta
                                                 </a>
