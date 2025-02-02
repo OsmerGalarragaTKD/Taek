@@ -17,7 +17,6 @@ class PermissionSeeder extends Seeder
         'sedes' => 'Sedes',
         'cinturones' => 'Cinturones',
         'categorias' => 'Categorías',
-        'documentos' => 'Documentos'
     ];
 
     private $actions = [
@@ -46,6 +45,11 @@ class PermissionSeeder extends Seeder
                 ]);
             }
         }
+
+        Permission::create([
+            'name' => 'gestionarPermisos',
+            'guard_name' => 'web'
+        ]);
 
         // Crear rol de Super Admin
         $superAdmin = Role::create([
