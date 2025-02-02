@@ -299,104 +299,67 @@ return [
     */
 
     'menu' => [
-        // Navbar items:
-        [
-            'type' => 'fullscreen-widget',
-            'topnav_right' => true,
-        ],
-
-        // Sidebar items:
-        [
-            'text' => 'blog',
-            'url' => 'home',
-            'can' => 'manage-blog',
-        ],
         [
             'text' => 'Dashboard',
             'url' => 'home',
             'icon' => 'fas fa-tachometer-alt',
+            'can' => 'ver_dashboard' // Permiso requerido
         ],
         ['header' => 'ESCUELA'],
         [
             'text' => 'Atletas',
             'url' => 'athlete',
             'icon' => 'fas fa-person-booth',
+            'can' => 'ver_atletas' // Permiso específico
         ],
         [
             'text' => 'Categorias',
             'url' => 'categories',
             'icon' => 'fas fa-list-alt',
+            'can' => 'ver_categorias'
         ],
         [
             'text' => 'Cinturones',
             'url' => 'belts',
             'icon' => 'fas fa-ribbon',
+            'can' => 'ver_cinturones'
         ],
         ['header' => 'ADMINISTRACION'],
         [
             'text' => 'Sedes',
             'url' => 'venues',
             'icon' => 'fas fa-building',
+            'can' => 'ver_sedes'
         ],
         [
             'text' => 'Eventos',
             'url' => 'events',
             'icon' => 'fas fa-calendar',
+            'can' => 'ver_eventos'
+        ],
+        [
+            'text' => 'Registrar en Eventos',
+            'url' => 'eventregistration',
+            'icon' => 'fas fa-calendar',
+            'can' => 'crear_eventos'
         ],
         [
             'text' => 'Pagos',
             'url' => 'payments',
             'icon' => 'fas fa-money-bill',
+            'can' => 'ver_pagos'
         ],
         [
             'text' => 'Pagos Usuarios',
             'url' => 'payments/user-payment',
             'icon' => 'fas fa-money-bill',
+            'can' => 'gestionar_pagos'
         ],
         [
-            'text' => 'Documentos',
-            'url' => 'documents',
-            'icon' => 'fas fa-file',
+            'text' => 'Usuarios y roles',
+            'url' => 'roles',
+            'icon' => 'fas fa-users',
         ],
-        /* [
-            'text' => 'multilevel',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                    'submenu' => [
-                        [
-                            'text' => 'level_two',
-                            'url' => '#',
-                        ],
-                        [
-                            'text' => 'level_two',
-                            'url' => '#',
-                            'submenu' => [
-                                [
-                                    'text' => 'level_three',
-                                    'url' => '#',
-                                ],
-                                [
-                                    'text' => 'level_three',
-                                    'url' => '#',
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-            ],
-        ], */
-
     ],
 
     /*

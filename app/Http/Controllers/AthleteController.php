@@ -8,6 +8,7 @@ use App\Models\AthleteRepresentatives;
 use App\Models\BeltGrade;
 use App\Models\Representative;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -193,25 +194,43 @@ class AthleteController extends Controller
         }
         try {
             DB::beginTransaction();
-            
+
             // Update athlete basic information
             $athlete->update($request->only([
-                'full_name', 'identity_document', 'nationality', 'birth_date',
-                'birth_place', 'gender', 'civil_status', 'profession',
-                'academic_level', 'institution', 'email', 'phone',
-                'social_media', 'address_state', 'address_city', 'address_details',
-                'passport_number', 'passport_expiry', 'height', 'current_weight',
-                'shirt_size', 'pants_size', 'shoe_size', 'medical_conditions',
+                'full_name',
+                'identity_document',
+                'nationality',
+                'birth_date',
+                'birth_place',
+                'gender',
+                'civil_status',
+                'profession',
+                'academic_level',
+                'institution',
+                'email',
+                'phone',
+                'social_media',
+                'address_state',
+                'address_city',
+                'address_details',
+                'passport_number',
+                'passport_expiry',
+                'height',
+                'current_weight',
+                'shirt_size',
+                'pants_size',
+                'shoe_size',
+                'medical_conditions',
                 'allergies'
             ]));
 
-           /*  dd([
+            /*  dd([
                 'athlete_id' => $athlete->id,
                 'grade_id' => $request->belt_grade_id,
                 'date_achieved' => $request->grade_date_achieved,
                 'certificate_number' => $request->grade_certificate_number,
             ]); */
-            
+
             // Create new grade
             AthleteGrade::create([
                 'athlete_id' => $athlete->id,
@@ -219,7 +238,7 @@ class AthleteController extends Controller
                 'date_achieved' => $request->grade_date_achieved,
                 'certificate_number' => $request->grade_certificate_number,
             ]);
-            
+
 
             // Handle representative information for minors
             if ($isMinor && $request->filled('representative_name')) {
@@ -259,6 +278,33 @@ class AthleteController extends Controller
             return back()
                 ->with('error', 'Error al actualizar la información. Por favor, intente nuevamente.')
                 ->withInput();
+        }
+    }
+
+    public function printConstancy($id)
+    {
+        try {
+            $athlete = Athlete::findOrFail($id);
+
+            // Calcular la edad
+            $age = $athlete->birth_date ? Carbon::parse($athlete->birth_date)->age : null;
+
+            $pdf = PDF::loadView('athlete.constancy', [
+                'athlete' => $athlete,
+                'age' => $age
+            ]);
+
+            // Configurar el PDF
+            $pdf->setPaper('letter');
+
+            // Nombre del archivo
+            $filename = 'constancia_' . str_replace(' ', '_', strtolower($athlete->full_name)) . '.pdf';
+
+            // Retornar el PDF para descarga
+            return $pdf->stream($filename);
+        } catch (\Exception $e) {
+            \Log::error('Error generando constancia: ' . $e->getMessage());
+            return back()->with('error', 'Error generando la constancia. Por favor, intente nuevamente.');
         }
     }
 

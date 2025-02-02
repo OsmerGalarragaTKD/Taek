@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Athlete extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'full_name',
         'identity_document',
@@ -74,10 +74,25 @@ class Athlete extends Model
     }
 
     public function athletesRepresenting()
-{
-    return $this->hasMany(AthleteRepresentatives::class, 'representative_id', 'identity_document')
-        ->whereHas('representative', function($query) {
-            $query->where('identity_document', $this->identity_document);
-        });
-}
+    {
+        return $this->hasMany(AthleteRepresentatives::class, 'representative_id', 'identity_document')
+            ->whereHas('representative', function ($query) {
+                $query->where('identity_document', $this->identity_document);
+            });
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    // Athlete.php
+
+    public function hasPaidEvent($eventId)
+    {
+        return $this->payments()
+            ->where('payment_type', 'Event_Registration')
+            ->where('status', 'Completed')
+            ->exists();
+    }
 }

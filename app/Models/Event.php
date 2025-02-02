@@ -26,8 +26,27 @@ class Event extends Model
         'registration_deadline' => 'date',
     ];
 
+    // Relación con la sede (venue)
     public function venue()
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    // Relación con las categorías del evento (a través de EventCategory)
+    public function eventCategories()
+    {
+        return $this->hasMany(EventCategory::class);
+    }
+
+    // Relación con las categorías (a través de EventCategory)
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'event_categories', 'event_id', 'category_id');
+    }
+
+    // Relación con los pagos asociados al evento
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

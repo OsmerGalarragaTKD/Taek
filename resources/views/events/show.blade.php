@@ -1,208 +1,226 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h5 class="mb-0">
-                                <i class="bi bi-calendar-event me-2"></i>
-                                Detalles del Evento
-                            </h5>
-                        </div>
-                        <div class="col text-end">
-                            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editEventModal">
-                                <i class="bi bi-pencil me-1"></i>
-                                Editar
-                            </button>
-                            <a href="{{ route('events.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>
-                                Volver
-                            </a>
-                        </div>
-                    </div>
-                </div>
+@section('title', 'Detalles del Evento')
 
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Nombre del Evento</h6>
-                            <p class="h5 mb-0">{{ $event->name }}</p>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Tipo</h6>
-                            <p class="mb-0">{{ str_replace('_', ' ', $event->type) }}</p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Sede</h6>
-                            <p class="mb-0">{{ $event->venue->name ?? 'No asignada' }}</p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Estado</h6>
-                            <p class="mb-0">
-                                @switch($event->status)
-                                    @case('Planned')
-                                        <span class="badge bg-warning">Planificado</span>
-                                        @break
-                                    @case('Active')
-                                        <span class="badge bg-primary">Activo</span>
-                                        @break
-                                    @case('Completed')
-                                        <span class="badge bg-success">Completado</span>
-                                        @break
-                                    @case('Cancelled')
-                                        <span class="badge bg-danger">Cancelado</span>
-                                        @break
-                                    @default
-                                        <span class="badge bg-secondary">{{ $event->status }}</span>
-                                @endswitch
-                            </p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Fecha de Inicio</h6>
-                            <p class="mb-0">{{ $event->start_date ? $event->start_date->format('d/m/Y') : 'No definida' }}</p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Fecha de Fin</h6>
-                            <p class="mb-0">{{ $event->end_date ? $event->end_date->format('d/m/Y') : 'No definida' }}</p>
-                        </div>
-
-                        <div class="col-12">
-                            <h6 class="text-muted mb-1">Fecha Límite de Inscripción</h6>
-                            <p class="mb-0">{{ $event->registration_deadline ? $event->registration_deadline->format('d/m/Y') : 'No definida' }}</p>
-                        </div>
-
-                        <div class="col-12">
-                            <h6 class="text-muted mb-1">Descripción</h6>
-                            <p class="mb-0">{{ $event->description ?? 'Sin descripción' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Detalles del Evento: {{ $event->name }}</h1>
+        <a href="{{ route('events.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left mr-1"></i>
+            Volver
+        </a>
     </div>
-</div>
+@stop
 
-<!-- Modal de Edición -->
-<div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editEventModalLabel">Editar Evento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('events.update', $event->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nombre del Evento</label>
-                        <input type="text" class="form-control" id="name" name="name" 
-                               value="{{ $event->name }}" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="type" class="form-label">Tipo de Evento</label>
-                        <select class="form-select" id="type" name="type" required>
-                            <option value="Competition" {{ $event->type == 'Competition' ? 'selected' : '' }}>Competencia</option>
-                            <option value="Promotion_Test" {{ $event->type == 'Promotion_Test' ? 'selected' : '' }}>Examen de Promoción</option>
-                            <option value="Training" {{ $event->type == 'Training' ? 'selected' : '' }}>Entrenamiento</option>
-                            <option value="Other" {{ $event->type == 'Other' ? 'selected' : '' }}>Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="venue_id" class="form-label">Sede</label>
-                        <select class="form-select" id="venue_id" name="venue_id">
-                            <option value="">Seleccionar sede...</option>
-                            @foreach($venues as $venue)
-                                <option value="{{ $venue->id }}" 
-                                        {{ $event->venue_id == $venue->id ? 'selected' : '' }}>
-                                    {{ $venue->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
+@section('content')
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="start_date" class="form-label">Fecha de Inicio</label>
-                                <input type="date" class="form-control" id="start_date" name="start_date" 
-                                       value="{{ $event->start_date ? $event->start_date->format('Y-m-d') : '' }}">
-                            </div>
+                            <dl>
+                                <dt>Nombre del Evento</dt>
+                                <dd>{{ $event->name }}</dd>
+
+                                <dt>Tipo de Evento</dt>
+                                <dd>{{ str_replace('_', ' ', $event->type) }}</dd>
+
+                                <dt>Sede</dt>
+                                <dd>{{ $event->venue->name ?? 'No asignada' }}</dd>
+
+                                <dt>Fecha de Inicio</dt>
+                                <dd>{{ $event->start_date ? $event->start_date->format('d/m/Y') : 'No definida' }}</dd>
+
+                                <dt>Fecha de Fin</dt>
+                                <dd>{{ $event->end_date ? $event->end_date->format('d/m/Y') : 'No definida' }}</dd>
+
+                                <dt>Fecha Límite de Inscripción</dt>
+                                <dd>{{ $event->registration_deadline ? $event->registration_deadline->format('d/m/Y') : 'No definida' }}
+                                </dd>
+
+                                <dt>Descripción</dt>
+                                <dd>{{ $event->description ?? 'Sin descripción' }}</dd>
+
+                                <dt>Estado</dt>
+                                <dd>
+                                    <span
+                                        class="badge badge-{{ $event->status === 'Active'
+                                            ? 'success'
+                                            : ($event->status === 'Planned'
+                                                ? 'info'
+                                                : ($event->status === 'Completed'
+                                                    ? 'secondary'
+                                                    : 'danger')) }}">
+                                        {{ $event->status }}
+                                    </span>
+                                </dd>
+                            </dl>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="end_date" class="form-label">Fecha de Fin</label>
-                                <input type="date" class="form-control" id="end_date" name="end_date" 
-                                       value="{{ $event->end_date ? $event->end_date->format('Y-m-d') : '' }}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="registration_deadline" class="form-label">Fecha Límite de Inscripción</label>
-                        <input type="date" class="form-control" id="registration_deadline" name="registration_deadline" 
-                               value="{{ $event->registration_deadline ? $event->registration_deadline->format('Y-m-d') : '' }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="description" name="description" 
-                                  rows="3">{{ $event->description }}</textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Estado</label>
-                        <select class="form-select" id="status" name="status" required>
-                            <option value="Planned" {{ $event->status == 'Planned' ? 'selected' : '' }}>Planificado</option>
-                            <option value="Active" {{ $event->status == 'Active' ? 'selected' : '' }}>Activo</option>
-                            <option value="Completed" {{ $event->status == 'Completed' ? 'selected' : '' }}>Completado</option>
-                            <option value="Cancelled" {{ $event->status == 'Cancelled' ? 'selected' : '' }}>Cancelado</option>
-                        </select>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Pagos Asociados</h3>
                 </div>
-            </form>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Atleta</th>
+                                    <th>Tipo de Pago</th>
+                                    <th>Monto</th>
+                                    <th>Estado</th>
+                                    <th>Fecha de Pago</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($event->payments as $payment)
+                                    <tr>
+                                        <td>{{ $payment->athlete->full_name }}</td>
+                                        <td>{{ $payment->payment_type }}</td>
+                                        <td>{{ number_format($payment->amount, 2) }}</td>
+                                        <td>{{ $payment->status }}</td>
+                                        <td>{{ $payment->payment_date ? $payment->payment_date->format('d/m/Y') : 'No definida' }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay pagos asociados a este evento.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-@push('js')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Validación de fechas en el modal
-    const modalStartDate = document.querySelector('#editEventModal #start_date');
-    const modalEndDate = document.querySelector('#editEventModal #end_date');
-    const modalRegistrationDeadline = document.querySelector('#editEventModal #registration_deadline');
+    <!-- Sección de Categorías del Evento -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3 class="card-title">Categorías del Evento</h3>
+            <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal"
+                data-target="#editCategoriesModal">
+                <i class="fas fa-edit"></i> Editar Categorías
+            </button>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Tarifa de Registro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($event->eventCategories as $eventCategory)
+                        <tr>
+                            <td>{{ $eventCategory->category->name . ' - ' . $eventCategory->category->type }}</td>
+                            <td>{{ number_format($eventCategory->registration_fee, 2) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="2" class="text-center">No hay categorías asociadas a este evento.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    modalStartDate.addEventListener('change', function() {
-        modalEndDate.min = this.value;
-    });
+    <!-- Modal para Editar Categorías -->
+    <div class="modal fade" id="editCategoriesModal" tabindex="-1" role="dialog"
+        aria-labelledby="editCategoriesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoriesModalLabel">Editar Categorías del Evento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('events.update-categories', $event->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
 
-    modalEndDate.addEventListener('change', function() {
-        modalStartDate.max = this.value;
-    });
+                        <div id="categories-container">
+                            @foreach ($event->eventCategories as $index => $eventCategory)
+                                <div class="category-row mb-3">
+                                    <div class="form-group">
+                                        <label for="category_id_{{ $index }}">Categoría</label>
+                                        <select name="categories[{{ $index }}][category_id]" class="form-control"
+                                            required>
+                                            <option value="">Seleccionar categoría...</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}"
+                                                    {{ $eventCategory->category_id == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->name . ' - ' . $category->type }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="registration_fee_{{ $index }}">Tarifa de Registro</label>
+                                        <input type="number" name="categories[{{ $index }}][registration_fee]"
+                                            class="form-control" value="{{ $eventCategory->registration_fee }}"
+                                            step="0.01" required>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
 
-    modalRegistrationDeadline.addEventListener('change', function() {
-        if(modalStartDate.value && this.value > modalStartDate.value) {
-            this.value = modalStartDate.value;
-            alert('La fecha límite de inscripción no puede ser posterior a la fecha de inicio del evento.');
-        }
-    });
-});
-</script>
-@endpush
-@endsection
+                        <button type="button" id="add-category" class="btn btn-secondary">
+                            <i class="fas fa-plus"></i> Agregar Categoría
+                        </button>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@stop
+
+@section('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let categoryIndex = {{ $event->eventCategories->count() }};
+
+            // Agregar una nueva fila de categoría
+            document.getElementById('add-category').addEventListener('click', function() {
+                const container = document.getElementById('categories-container');
+                const newRow = document.createElement('div');
+                newRow.classList.add('category-row', 'mb-3');
+
+                newRow.innerHTML = `
+                <div class="form-group">
+                    <label for="category_id_${categoryIndex}">Categoría</label>
+                    <select name="categories[${categoryIndex}][category_id]" class="form-control" required>
+                        <option value="">Seleccionar categoría...</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name . ' - ' . $category->type }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="registration_fee_${categoryIndex}">Tarifa de Registro</label>
+                    <input type="number" name="categories[${categoryIndex}][registration_fee]" class="form-control" step="0.01" required>
+                </div>
+            `;
+
+                container.appendChild(newRow);
+                categoryIndex++;
+            });
+        });
+    </script>
+@stop

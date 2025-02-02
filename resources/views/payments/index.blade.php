@@ -1,182 +1,186 @@
 @extends('layouts.app')
 
+@section('title', 'Pagos')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Gestión de Pagos</h1>
+        <div>
+            <a href="{{ route('payments.pending') }}" class="btn btn-warning mr-2">
+                <i class="fas fa-clock mr-1"></i> Pagos Pendientes
+            </a>
+            <a href="{{ route('payments.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus mr-1"></i> Registrar Pago
+            </a>
+        </div>
+    </div>
+@stop
+
 @section('content')
-    <div class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle mr-2"></i>
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
 
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white py-3">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-cash me-2"></i>
-                                    Listado de Pagos
-                                </h5>
-                            </div>
-                            <div class="col text-end">
-                                <a href="{{ route('payments.pending') }}" class="btn btn-warning me-2">
-                                    <i class="bi bi-clock-history me-1"></i>
-                                    Pagos Pendientes
-                                </a>
-                                <a href="{{ route('payments.create') }}" class="btn btn-primary">
-                                    <i class="bi bi-plus-circle me-1"></i>
-                                    Nuevo Pago
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table id="paymentsTable" class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th scope="col" class="px-4">Atleta</th>
-                                        <th scope="col">Monto</th>
-                                        <th scope="col">Fecha</th>
-                                        <th scope="col">Tipo</th>
-                                        <th scope="col">Método</th>
-                                        <th scope="col" class="text-center">Estado</th>
-                                        <th scope="col" class="text-end px-4">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($payments as $payment)
-                                        <tr>
-                                            <td class="px-4">{{ $payment->athlete->full_name ?? 'N/A' }}</td>
-                                            <td>${{ number_format($payment->amount, 2) }}</td>
-                                            <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
-                                            <td>{{ $payment->payment_type }}</td>
-                                            <td>{{ $payment->payment_method }}</td>
-                                            <td class="text-center">
-                                                @switch($payment->status)
-                                                    @case('Planned')
-                                                        <span class="badge bg-warning">Planificado</span>
-                                                    @break
-
-                                                    @case('Active')
-                                                        <span class="badge bg-primary">Activo</span>
-                                                    @break
-
-                                                    @case('Completed')
-                                                        <span class="badge bg-success">Completado</span>
-                                                    @break
-
-                                                    @case('Cancelled')
-                                                        <span class="badge bg-danger">Cancelado</span>
-                                                    @break
-
-                                                    @default
-                                                        <span class="badge bg-secondary">{{ $payment->status }}</span>
-                                                @endswitch
-                                            </td>
-                                            <td class="text-end px-4">
-                                                @if ($payment->status === 'Pending')
-                                                    <form action="{{ route('payments.approve.single', $payment->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm btn-success me-2"
-                                                            title="Aprobar Pago">
-                                                            <i class="bi bi-check-lg"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                                <a href="{{ route('payments.show', $payment->id) }}"
-                                                    class="btn btn-sm btn-info me-2">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <form action="{{ route('payments.destroy', $payment->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('¿Estás seguro de eliminar este pago?')">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center py-4">
-                                                    <div class="d-flex flex-column align-items-center">
-                                                        <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
-                                                        <p class="mb-0 mt-2">No hay pagos registrados</p>
-                                                        <a href="{{ route('payments.create') }}"
-                                                            class="btn btn-sm btn-primary mt-3">
-                                                            <i class="bi bi-plus-circle me-1"></i>
-                                                            Crear Nuevo Pago
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="payments-table" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Atleta</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Método</th>
+                            <th>Estado</th>
+                            <th>Referencia</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($payments as $payment)
+                            <tr>
+                                <td>{{ $payment->athlete->full_name }}</td>
+                                <td>${{ number_format($payment->amount, 2) }}</td>
+                                <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
+                                <td>
+                                    @switch($payment->payment_type)
+                                        @case('Monthly_Fee')
+                                            Mensualidad
+                                            @break
+                                        @case('Event_Registration')
+                                            Evento
+                                            @break
+                                        @case('Equipment')
+                                            Equipo
+                                            @break
+                                        @default
+                                            {{ $payment->payment_type }}
+                                    @endswitch
+                                </td>
+                                <td>
+                                    @switch($payment->payment_method)
+                                        @case('Transfer')
+                                            Transferencia
+                                            @break
+                                        @case('Card')
+                                            Tarjeta
+                                            @break
+                                        @case('Cash')
+                                            Efectivo
+                                            @break
+                                        @default
+                                            {{ $payment->payment_method }}
+                                    @endswitch
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ 
+                                        $payment->status === 'Completed' ? 'success' : 
+                                        ($payment->status === 'Pending' ? 'warning' : 'danger') 
+                                    }}">
+                                        {{ $payment->status }}
+                                    </span>
+                                </td>
+                                <td>{{ $payment->reference_number ?? 'N/A' }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ route('payments.show', $payment->id) }}" 
+                                           class="btn btn-sm btn-info" 
+                                           title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if($payment->status === 'Pending')
+                                            <form action="{{ route('payments.approve-single', $payment->id) }}" 
+                                                  method="POST" 
+                                                  class="d-inline">
+                                                @csrf
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-success" 
+                                                        title="Aprobar pago"
+                                                        onclick="return confirm('¿Está seguro de aprobar este pago?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
+@stop
 
-        @push('css')
-            <style>
-                .table> :not(caption)>*>* {
-                    padding: 1rem 0.5rem;
-                }
+@section('css')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.bootstrap4.min.css">
+@stop
 
-                .pagination {
-                    margin-bottom: 0;
-                }
-            </style>
-        @endpush
+@section('js')
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
 
-        @push('js')
-            <script>
-                $(document).ready(function() {
-                    $('#paymentsTable').DataTable({
-                        "language": {
-                            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-                        },
-                        "responsive": true,
-                        "autoWidth": false,
-                        "order": [
-                            [2, 'desc']
-                        ],
-                        "pageLength": 10,
-                        "columnDefs": [{
-                            "targets": -1,
-                            "orderable": false
-                        }]
-                    });
+    <script>
+        $(document).ready(function() {
+            $('#payments-table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json'
+                },
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel mr-1"></i> Excel',
+                        className: 'btn btn-success btn-sm',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6]
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
+                        className: 'btn btn-danger btn-sm',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print mr-1"></i> Imprimir',
+                        className: 'btn btn-info btn-sm',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6]
+                        }
+                    }
+                ],
+                order: [[2, 'desc']],
+                columnDefs: [
+                    {
+                        targets: [-1],
+                        orderable: false
+                    }
+                ]
+            });
+        });
 
-                    // Auto-cerrar alertas después de 5 segundos
-                    window.setTimeout(function() {
-                        document.querySelectorAll(".alert").forEach(function(alert) {
-                            var bsAlert = new bootstrap.Alert(alert);
-                            setTimeout(function() {
-                                bsAlert.close();
-                            }, 5000);
-                        });
-                    }, 1000);
-                });
-            </script>
-        @endpush
-    @endsection
+        // Auto-cerrar alertas después de 5 segundos
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+    </script>
+@stop

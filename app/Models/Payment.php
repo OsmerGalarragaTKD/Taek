@@ -11,22 +11,26 @@ class Payment extends Model
 
     protected $fillable = [
         'athlete_id',
-        'amount',
-        'payment_date',
+        'event_id', // Nuevo campo para asociar el pago a un evento
         'payment_type',
-        'payment_method',
+        'amount',
         'status',
-        'reference_number',
-        'receipt_url',
-        'notes',
+        'payment_date',
     ];
 
     protected $casts = [
         'payment_date' => 'datetime',
     ];
 
+    // Relación con el atleta
     public function athlete()
     {
         return $this->belongsTo(Athlete::class);
+    }
+
+    // Relación con el evento
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
     }
 }

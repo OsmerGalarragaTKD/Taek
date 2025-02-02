@@ -5,9 +5,11 @@ use App\Http\Controllers\BeltGradeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventRegistrationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\VenueController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,7 +35,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/documents/{id}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
     Route::get('/payments/user-payment', [PaymentController::class, 'userPayment'])->name('payments.user-payment');
     Route::post('/payments/user-store', [PaymentController::class, 'userStore'])->name('payments.user-store');
+    Route::post('/events/{event}/register', [EventController::class, 'register'])->name('events.register');
+    Route::resource('/eventregistration', EventRegistrationController::class);
+    Route::get('/eventregistration/createEvent/{event}', [EventRegistrationController::class, 'createEvent'])->name('eventregistration.createEvent');
+    Route::put('/events/{id}/update-categories', [EventController::class, 'updateCategories'])
+        ->name('events.update-categories');
+    // Agregar esta ruta para el endpoint de eventos disponibles
+    Route::get('/api/athletes/{athlete}/available-events', [PaymentController::class, 'getAvailableEvents']);
+    Route::get('/athlete/{id}/print-constancy', [AthleteController::class, 'printConstancy'])
+    ->name('athlete.print-constancy');
+
+
 });
+
+Route::resource('/roles', RoleController::class)->middleware('auth');
+Route::post('/roles/assign/{user}', [RoleController::class, 'assignRole'])->name('roles.assign')->middleware('auth');
 
 Route::resource('/athlete', AthleteController::class)->middleware('auth');
 Route::resource('/categories', CategoryController::class)->middleware('auth');
