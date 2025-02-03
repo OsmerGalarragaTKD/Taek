@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CategorySeeder::class,
             BeltGradeSeeder::class,
+            PermissionSeeder::class
         ]);
     }
 }

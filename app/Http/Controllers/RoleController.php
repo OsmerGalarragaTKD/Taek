@@ -31,7 +31,7 @@ class RoleController extends Controller
             $groupedPermissions = $permissions->groupBy(function ($permission) {
                 return explode('_', $permission->name)[1];
             });
-            return view('roles.create', compact('groupedPermissions'));
+            return view('roles.create', compact('permissions','groupedPermissions'));
         } catch (\Exception $e) {
             Log::error('Error al cargar formulario de creación: ' . $e->getMessage());
             return redirect()->route('roles.index')->with('error', 'Error al cargar el formulario');
@@ -43,8 +43,9 @@ class RoleController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|unique:roles,name',
             'permissions' => 'required|array',
-            'permissions.*' => 'exists:permissions,id'
         ]);
+
+
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -55,8 +56,10 @@ class RoleController extends Controller
         try {
             DB::beginTransaction();
 
+
             $role = Role::create(['name' => $request->name]);
             $role->syncPermissions($request->permissions);
+
 
             DB::commit();
             Log::info("Rol creado: {$role->name}");

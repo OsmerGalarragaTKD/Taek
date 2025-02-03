@@ -47,7 +47,7 @@ class PermissionSeeder extends Seeder
         }
 
         Permission::create([
-            'name' => 'gestionarPermisos',
+            'name' => 'gestionar_permisos',
             'guard_name' => 'web'
         ]);
 

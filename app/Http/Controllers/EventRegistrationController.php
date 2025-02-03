@@ -8,6 +8,7 @@ use App\Models\EventRegistration;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class EventRegistrationController extends Controller
 {
@@ -22,10 +23,7 @@ class EventRegistrationController extends Controller
         return view('event-registrations.index', compact('activeEvents', 'registrations'));
     }
 
-    public function create()
-    {
-        
-    }
+    public function create() {}
 
     public function createEvent(Event $event)
     {
@@ -37,12 +35,7 @@ class EventRegistrationController extends Controller
         }
 
         // Obtener atletas con pagos aprobados
-        $athletes = Athlete::select('id', 'full_name', 'identity_document')
-            ->whereHas('payments', function ($query) {
-                $query->where('payment_type', 'Event_Registration')
-                    ->where('status', 'Completed');
-            })
-            ->get();
+        $athletes = Athlete::select('id', 'full_name', 'identity_document')->get();
 
         // Obtener las categorías asociadas al evento
         $categories = $event->categories;
@@ -55,14 +48,22 @@ class EventRegistrationController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+
+        $validator = Validator::make($request->all(), [
             'event_id' => 'required|exists:events,id',
             'athlete_id' => 'required|exists:athletes,id',
             'category_id' => 'required|exists:categories,id',
         ]);
 
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         try {
             DB::beginTransaction();
+            
 
             // Verificar si el atleta ya está registrado en el evento
             $existingRegistration = EventRegistration::where('event_id', $request->event_id)
@@ -73,9 +74,10 @@ class EventRegistrationController extends Controller
                 return redirect()->back()
                     ->with('error', 'El atleta ya está registrado en este evento.');
             }
+            
 
             // Verificar si el atleta tiene el pago aprobado
-            $hasPaidEvent = Payment::where('athlete_id', $request->athlete_id)
+            /* $hasPaidEvent = Payment::where('athlete_id', $request->athlete_id)
                 ->where('payment_type', 'Event_Registration')
                 ->where('status', 'Completed')
                 ->exists();
@@ -83,7 +85,9 @@ class EventRegistrationController extends Controller
             if (!$hasPaidEvent) {
                 return redirect()->back()
                     ->with('error', 'El atleta debe tener un pago aprobado para registrarse en el evento.');
-            }
+            } */
+
+           
 
             EventRegistration::create([
                 'event_id' => $request->event_id,
