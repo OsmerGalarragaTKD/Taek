@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AthleteController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BeltGradeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DocumentController;
@@ -17,9 +18,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/home', function () {
+    return view('home');
+})->middleware(['auth', 'verified'])->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -57,6 +58,7 @@ Route::resource('/belts', BeltGradeController::class)->middleware('auth');
 Route::resource('/payments', PaymentController::class)->middleware('auth');
 Route::resource('/events', EventController::class)->middleware('auth');
 Route::resource('/venues', VenueController::class)->middleware('auth');
+Route::post('/backup/create', [BackupController::class, 'create'])->name('backup.create')->middleware('auth');
 
 
 // Rutas para pagos pendientes

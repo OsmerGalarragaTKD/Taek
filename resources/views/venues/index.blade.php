@@ -119,9 +119,6 @@
 <script>
 $(document).ready(function() {
     $('#venuesTable').DataTable({
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-        },
         "responsive": true,
         "autoWidth": false,
         "order": [[0, 'asc']],

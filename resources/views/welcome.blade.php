@@ -202,7 +202,7 @@
             <p class="lead mb-4" data-aos="fade-up" data-aos-delay="200">
                 Formando campeones en el tatami y en la vida
             </p>
-            <a href="{{ route('login') }}" class="btn btn-login btn-lg text-white" data-aos="fade-up"
+            <a href="{{ route('register') }}" class="btn btn-login btn-lg text-white" data-aos="fade-up"
                 data-aos-delay="400">
                 Únete a Nosotros
             </a>

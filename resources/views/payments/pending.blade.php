@@ -17,7 +17,7 @@
 @stop
 
 @section('content')
-    @if(session('success'))
+    @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             <i class="fas fa-check-circle mr-2"></i>
             {{ session('success') }}
@@ -44,7 +44,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($payments as $payment)
+                        @foreach ($payments as $payment)
                             <tr>
                                 <td>{{ $payment->athlete->full_name }}</td>
                                 <td>${{ number_format($payment->amount, 2) }}</td>
@@ -53,13 +53,16 @@
                                     @switch($payment->payment_type)
                                         @case('Monthly_Fee')
                                             Mensualidad
-                                            @break
+                                        @break
+
                                         @case('Event_Registration')
                                             Evento
-                                            @break
+                                        @break
+
                                         @case('Equipment')
                                             Equipo
-                                            @break
+                                        @break
+
                                         @default
                                             {{ $payment->payment_type }}
                                     @endswitch
@@ -68,42 +71,39 @@
                                     @switch($payment->payment_method)
                                         @case('Transfer')
                                             Transferencia
-                                            @break
+                                        @break
+
                                         @case('Card')
                                             Tarjeta
-                                            @break
+                                        @break
+
                                         @case('Cash')
                                             Efectivo
-                                            @break
+                                        @break
+
                                         @default
                                             {{ $payment->payment_method }}
                                     @endswitch
                                 </td>
                                 <td>
-                                    <span class="badge badge-{{ 
-                                        $payment->status === 'Completed' ? 'success' : 
-                                        ($payment->status === 'Pending' ? 'warning' : 'danger') 
-                                    }}">
+                                    <span
+                                        class="badge badge-{{ $payment->status === 'Completed' ? 'success' : ($payment->status === 'Pending' ? 'warning' : 'danger') }}">
                                         {{ $payment->status }}
                                     </span>
                                 </td>
                                 <td>{{ $payment->reference_number ?? 'N/A' }}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{{ route('payments.show', $payment->id) }}" 
-                                           class="btn btn-sm btn-info" 
-                                           title="Ver detalles">
+                                        <a href="{{ route('payments.show', $payment->id) }}" class="btn btn-sm btn-info"
+                                            title="Ver detalles">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        @if($payment->status === 'Pending')
-                                            <form action="{{ route('payments.approve-single', $payment->id) }}" 
-                                                  method="POST" 
-                                                  class="d-inline">
+                                        @if ($payment->status === 'Pending')
+                                            <form action="{{ route('payments.approve-single', $payment->id) }}"
+                                                method="POST" class="d-inline">
                                                 @csrf
-                                                <button type="submit" 
-                                                        class="btn btn-sm btn-success" 
-                                                        title="Aprobar pago"
-                                                        onclick="return confirm('¿Está seguro de aprobar este pago?')">
+                                                <button type="submit" class="btn btn-sm btn-success" title="Aprobar pago"
+                                                    onclick="return confirm('¿Está seguro de aprobar este pago?')">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             </form>
@@ -120,20 +120,20 @@
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/buttons.bootstrap4.min.css') }}">
 @stop
 
 @section('js')
-    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.bootstrap4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+    <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('js/buttons.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('js/jszip.min.js') }}"></script>
+    <script src="{{ asset('js/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('js/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('js/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('js/buttons.print.min.js') }}"></script>
 
     <script>
         $(document).ready(function() {
@@ -142,8 +142,7 @@
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json'
                 },
                 dom: 'Bfrtip',
-                buttons: [
-                    {
+                buttons: [{
                         extend: 'excel',
                         text: '<i class="fas fa-file-excel mr-1"></i> Excel',
                         className: 'btn btn-success btn-sm',
@@ -168,13 +167,13 @@
                         }
                     }
                 ],
-                order: [[2, 'desc']],
-                columnDefs: [
-                    {
-                        targets: [-1],
-                        orderable: false
-                    }
-                ]
+                order: [
+                    [2, 'desc']
+                ],
+                columnDefs: [{
+                    targets: [-1],
+                    orderable: false
+                }]
             });
         });
 

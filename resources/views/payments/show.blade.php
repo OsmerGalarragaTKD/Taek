@@ -339,7 +339,7 @@
 @stop
 
 @section('js')
-    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.min.js"></script>
+    <script src="{{asset('js/bs-custom-file-input.min.js')}}"></script>
     <script>
         $(document).ready(function() {
             bsCustomFileInput.init();

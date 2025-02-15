@@ -361,6 +361,7 @@ return [
             'icon' => 'fas fa-users',
             'can' => 'gestionarPermisos'
         ],
+        
     ],
 
     /*

@@ -60,4 +60,3 @@
     <script src="{{ asset('vendor/datatables/js/dataTables.bootstrap4.js') }}"></script>
     <script src="{{ asset('vendor/chartjs/chart.js') }}"></script>
 @endpush
-
