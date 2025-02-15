@@ -55,7 +55,7 @@
                                                         <div class="form-check">
                                                             <input class="form-check-input permission-checkbox"
                                                                 type="checkbox" name="permissions[]"
-                                                                value="{{ $permission->id }}"
+                                                                value="{{ $permission->name }}"
                                                                 id="permission_{{ $permission->id }}"
                                                                 data-module="{{ $module }}"
                                                                 {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}>
@@ -91,63 +91,36 @@
     @push('js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Manejar checkbox de módulos
-            document.querySelectorAll('.module-checkbox').forEach(function(checkbox) {
-                checkbox.addEventListener('change', function() {
-                    const module = this.dataset.module;
-                    const modulePermissions = document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`);
-                    modulePermissions.forEach(permission => {```tsx file="resources/views/admin/roles/create.blade.php" continued...
-                    modulePermissions.forEach(permission => {
-                        permission.checked = this.checked;
-                    });
-                });
+          // Manejar checkbox de módulos
+          document.querySelectorAll('.module-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+              const module = this.dataset.module;
+              const modulePermissions = document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`);
+              modulePermissions.forEach(permission => {
+                permission.checked = this.checked;
+              });
             });
-        
-            // Actualizar checkbox de módulo basado en permisos individuales
-            document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
-                checkbox.addEventListener('change', function() {
-                    const module = this.dataset.module;
-                    const moduleCheckbox = document.querySelector(`#module_${module}`);
-                    const modulePermissions = document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`);
-                    const allChecked = Array.from(modulePermissions).every(permission => permission.checked);
-                    moduleCheckbox.checked = allChecked;
-                });
+          });
+      
+          // Actualizar checkbox de módulo basado en permisos individuales
+          document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+              const module = this.dataset.module;
+              const moduleCheckbox = document.querySelector(`#module_${module}`);
+              const modulePermissions = document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`);
+              const allChecked = Array.from(modulePermissions).every(permission => permission.checked);
+              moduleCheckbox.checked = allChecked;
             });
-        
-            // Verificar estado inicial de los módulos
-            document.querySelectorAll('.module-checkbox').forEach(function(moduleCheckbox) {
-                const module = moduleCheckbox.dataset.module;
-                const modulePermissions = document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`);
-                const allChecked = Array.from(modulePermissions).every(permission => permission.checked);
-                moduleCheckbox.checked = allChecked;
-            });
-        });
-        </script>
-    });
-
-    // Actualizar checkbox de módulo basado en permisos individuales
-    document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
-        checkbox.addEventListener('change', function() {
-            const module = this.dataset.module;
-            const moduleCheckbox = document.querySelector(`
-                                                            #module_$ {
-                                                                module
-                                                            }
-                                                            `);
-            const modulePermissions = document.querySelectorAll(`.permission - checkbox[data - module = "${module}"] `);
+          });
+      
+          // Verificar estado inicial de los módulos
+          document.querySelectorAll('.module-checkbox').forEach(function(moduleCheckbox) {
+            const module = moduleCheckbox.dataset.module;
+            const modulePermissions = document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`);
             const allChecked = Array.from(modulePermissions).every(permission => permission.checked);
             moduleCheckbox.checked = allChecked;
+          });
         });
-    });
-
-    // Verificar estado inicial de los módulos
-    document.querySelectorAll('.module-checkbox').forEach(function(moduleCheckbox) {
-        const module = moduleCheckbox.dataset.module;
-        const modulePermissions = document.querySelectorAll(`.permission - checkbox[data - module = "${module}"] `);
-                const allChecked = Array.from(modulePermissions).every(permission => permission.checked);
-                moduleCheckbox.checked = allChecked;
-            });
-        });
-        </script>
+      </script>
     @endpush
 @endsection

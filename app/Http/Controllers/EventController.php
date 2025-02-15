@@ -48,11 +48,13 @@ class EventController extends Controller
             'categories.*.registration_fee' => 'nullable|numeric', // Validar la tarifa de registro
         ]);
 
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
+
 
         try {
             DB::beginTransaction();

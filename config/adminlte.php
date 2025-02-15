@@ -359,7 +359,7 @@ return [
             'text' => 'Usuarios y roles',
             'url' => 'roles',
             'icon' => 'fas fa-users',
-            'can' => 'gestionarPermisos'
+            'can' => 'gestionar_permisos'
         ],
         
     ],
