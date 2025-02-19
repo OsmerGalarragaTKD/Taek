@@ -287,7 +287,7 @@
                                                             </h6>
                                                             <small class="text-muted">
                                                                 Obtenido el
-                                                                {{ $athlete->currentGrade->date_achieved->format('d/m/Y') }}
+                                                                {{ $athlete->currentGrade->date_achieved?->format('d/m/Y')  ?? 'No registrado' }}
                                                             </small>
                                                         </div>
                                                     </div>
@@ -313,7 +313,7 @@
                                                                 <div class="timeline-content">
                                                                     <h6 class="mb-1">{{ $grade->grade->name }}</h6>
                                                                     <small
-                                                                        class="text-muted">{{ $grade->date_achieved->format('d/m/Y') }}</small>
+                                                                        class="text-muted">{{ $grade->date_achieved?->format('d/m/Y') ?? 'No registrado' }}</small>
                                                                     @if ($grade->certificate_number)
                                                                         <br>
                                                                         <small class="text-muted">Certificado:
@@ -448,7 +448,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Fecha de Nacimiento</label>
-                                <input type="date" class="form-control" name="birth_date"
+                                <input type="date" class="form-control" name="birth_date" max="{{ date('Y-m-d', strtotime('-3 years')) }}"
                                     value="{{ $athlete->birth_date?->format('Y-m-d') }}">
                             </div>
                             <div class="col-md-6">
@@ -642,7 +642,7 @@
                                 <label class="form-label">Fecha de Obtención *</label>
                                 <input type="date" class="form-control @error('grade_date_achieved') is-invalid @enderror" 
                                        name="grade_date_achieved" required
-                                       value="{{ $athlete->currentGrade ? $athlete->currentGrade->date_achieved->format('Y-m-d') : '' }}">
+                                       value="{{ $athlete->currentGrade ? $athlete->currentGrade->date_achieved?->format('Y-m-d') : '' }}">
                                 @error('grade_date_achieved')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

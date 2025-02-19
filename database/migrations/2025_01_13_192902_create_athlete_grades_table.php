@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('athlete_id')->constrained()->onDelete('cascade');
             $table->foreignId('grade_id')->constrained('belt_grades')->onDelete('cascade');
-            $table->date('date_achieved');
+            $table->date('date_achieved')->nullable();
             $table->string('certificate_number', 50)->nullable();
             $table->text('examiner_notes')->nullable();
             $table->timestamps();

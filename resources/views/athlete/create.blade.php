@@ -120,7 +120,8 @@
                                             <label for="birth_date" class="form-label">Fecha de Nacimiento</label>
                                             <input type="date"
                                                 class="form-control @error('birth_date') is-invalid @enderror"
-                                                id="birth_date" name="birth_date" value="{{ old('birth_date') }}">
+                                                id="birth_date" name="birth_date" value="{{ old('birth_date') }}"
+                                                max="{{ date('Y-m-d', strtotime('-3 years')) }}" required>
                                             @error('birth_date')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -359,9 +360,7 @@
                         })
                 })()
 
-                <
-                !--Mantener el script de validación existente y agregar: -- >
-                    <
+                // Mantener el script de validación existente y agregar:
                     window.setTimeout(function() {
                         document.querySelectorAll(".alert").forEach(function(alert) {
                             var bsAlert = new bootstrap.Alert(alert);
@@ -370,6 +369,18 @@
                             }, 5000);
                         });
                     }, 1000);
+
+                document.getElementById('birth_date').addEventListener('change', function() {
+                    const selectedDate = new Date(this.value);
+                    const minValidDate = new Date();
+                    minValidDate.setFullYear(minValidDate.getFullYear() - 3);
+
+                    if (selectedDate > minValidDate) {
+                        this.setCustomValidity('Debes tener al menos 3 años de edad');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });               
             </script>
         @endpush
     @endsection

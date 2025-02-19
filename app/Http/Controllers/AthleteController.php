@@ -37,11 +37,18 @@ class AthleteController extends Controller
      */
     public function store(Request $request)
     {
+
+        $minDate = Carbon::now()->subYears(3)->format('Y-m-d');
+
+
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:255',
             'identity_document' => 'nullable|string|max:20',
             'nationality' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
+            'birth_date' => [
+                'date',
+                'before_or_equal:' . $minDate // Validación de edad mínima
+            ],
             'gender' => 'required|in:M,F',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
@@ -57,6 +64,15 @@ class AthleteController extends Controller
             'emergency_contact_relation' => 'nullable|string|max:100',
         ]);
 
+        $validator->after(function ($validator) use ($minDate) {
+            if ($validator->failed('birth_date')) {
+                $validator->errors()->add(
+                    'birth_date',
+                    "La fecha de nacimiento debe ser anterior a $minDate (mínimo 3 años de edad)"
+                );
+            }
+        });
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
@@ -66,7 +82,7 @@ class AthleteController extends Controller
         try {
             DB::beginTransaction();
 
-            Athlete::create([
+            $athlete = Athlete::create([
                 'full_name' => $request->full_name,
                 'identity_document' => $request->identity_document,
                 'nationality' => $request->nationality,
@@ -84,6 +100,12 @@ class AthleteController extends Controller
                 'emergency_contact_name' => $request->emergency_contact_name,
                 'emergency_contact_phone' => $request->emergency_contact_phone,
                 'emergency_contact_relation' => $request->emergency_contact_relation,
+            ]);
+
+            AthleteGrade::create([
+                'athlete_id' => $athlete->id,
+                'grade_id' => 1,
+                'date_achieved' => $request->grade_date_achieved,
             ]);
 
             DB::commit();
@@ -132,6 +154,9 @@ class AthleteController extends Controller
     {
         $athlete = Athlete::findOrFail($id);
 
+        $minDate = Carbon::now()->subYears(3)->format('Y-m-d');
+
+
         // Determine if athlete is minor
         $isMinor = $athlete->birth_date ? Carbon::parse($athlete->birth_date)->age < 18 : false;
 
@@ -140,7 +165,10 @@ class AthleteController extends Controller
             'full_name' => 'required|string|max:255',
             'identity_document' => 'nullable|string|max:20',
             'nationality' => 'nullable|string|in:Venezolano,Extranjero',
-            'birth_date' => 'nullable|date',
+            'birth_date' => [
+                'date',
+                'before_or_equal:' . $minDate // Validación de edad mínima
+            ],
             'birth_place' => 'nullable|string|max:255',
             'gender' => 'required|in:M,F',
             'civil_status' => 'nullable|string|in:Soltero,Casado,Divorciado,Viudo',
@@ -186,6 +214,14 @@ class AthleteController extends Controller
 
         $validator = Validator::make($request->all(), $rules);
 
+        $validator->after(function ($validator) use ($minDate) {
+            if ($validator->failed('birth_date')) {
+                $validator->errors()->add(
+                    'birth_date',
+                    "La fecha de nacimiento debe ser anterior a $minDate (mínimo 3 años de edad)"
+                );
+            }
+        });
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -236,7 +272,6 @@ class AthleteController extends Controller
                 'athlete_id' => $athlete->id,
                 'grade_id' => $request->belt_grade_id,
                 'date_achieved' => $request->grade_date_achieved,
-                'certificate_number' => $request->grade_certificate_number,
             ]);
 
 
