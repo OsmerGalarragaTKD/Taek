@@ -72,7 +72,7 @@ class VenueController extends Controller
             DB::commit();
 
             return redirect()->route('venues.index')
-                ->with('success', 'Venue created successfully');
+                ->with('success', 'Sede creada exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error al ingresar : ". $e->getMessage());
@@ -146,13 +146,13 @@ class VenueController extends Controller
             DB::commit();
 
             return redirect()->route('venues.index')
-                ->with('success', 'Venue updated successfully');
+                ->with('success', 'Sede actualizada exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error al actualizar : ". $e->getMessage());
 
             return redirect()->back()
-                ->with('error', 'Fallo al actualizar venue');
+                ->with('error', 'Fallo al actualizar Sede');
         }
     }
 
