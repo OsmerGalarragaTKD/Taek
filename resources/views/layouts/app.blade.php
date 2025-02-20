@@ -47,12 +47,14 @@
 @stop
 
 @push('css')
+    @vite(['resources/sass/app.scss'])
     <link rel="stylesheet" href="{{ asset('vendor/datatables/css/dataTables.bootstrap4.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/chartjs/chart.css') }}">
     <link rel="stylesheet" href="{{ asset('icons/bootstrap-icons.css') }}">
 @endpush
 
 @push('js')
+    @vite(['resources/js/app.js'])
     <script src="{{ asset('vendor/datatables/js/jquery.dataTables.js') }}"></script>
     <script src="{{ asset('vendor/datatables/js/dataTables.bootstrap4.js') }}"></script>
     <script src="{{ asset('vendor/chartjs/chart.js') }}"></script>

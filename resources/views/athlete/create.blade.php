@@ -360,16 +360,17 @@
                         })
                 })()
 
-                // Mantener el script de validación existente y agregar:
-                    window.setTimeout(function() {
-                        document.querySelectorAll(".alert").forEach(function(alert) {
-                            var bsAlert = new bootstrap.Alert(alert);
-                            setTimeout(function() {
-                                bsAlert.close();
-                            }, 5000);
-                        });
-                    }, 1000);
+                // Cierra alertas automáticamente
+                window.setTimeout(function() {
+                    document.querySelectorAll(".alert").forEach(function(alert) {
+                        var bsAlert = new bootstrap.Alert(alert);
+                        setTimeout(function() {
+                            bsAlert.close();
+                        }, 5000);
+                    });
+                }, 1000);
 
+                // Validación de fecha de nacimiento
                 document.getElementById('birth_date').addEventListener('change', function() {
                     const selectedDate = new Date(this.value);
                     const minValidDate = new Date();
@@ -380,7 +381,45 @@
                     } else {
                         this.setCustomValidity('');
                     }
-                });               
+                });
+
+                // Validación de campos alfanuméricos
+                const alphanumericFields = [
+                    'full_name',
+                    'emergency_contact_name',
+                    'emergency_contact_relation'
+                ];
+
+                alphanumericFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+
+                    field.addEventListener('input', function(e) {
+                        // Expresión regular que permite:
+                        // - Letras mayúsculas y minúsculas (incluyendo acentos)
+                        // - Números
+                        // - Espacios
+                        const regex = /^[a-zA-Z0-9ÁÉÍÓÚáéíóúñÑÜü\s]*$/;
+
+                        // Eliminar caracteres no permitidos
+                        this.value = this.value.replace(/[^a-zA-Z0-9ÁÉÍÓÚáéíóúñÑÜü\s]/g, '');
+                    });
+
+                    // Validación en tiempo real
+                    field.addEventListener('keypress', function(e) {
+                        const char = String.fromCharCode(e.keyCode || e.which);
+                        const regex = /^[a-zA-Z0-9ÁÉÍÓÚáéíóúñÑÜü\s]$/;
+
+                        if (!regex.test(char)) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+
+                // Validación adicional para documento de identidad
+                document.getElementById('identity_document').addEventListener('input', function(e) {
+                    // Permite solo números y letras
+                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+                });
             </script>
         @endpush
     @endsection
