@@ -232,6 +232,8 @@
         </div>
 
         @push('css')
+            <link rel="stylesheet" href="{{ asset('icons/bootstrap-icons.css') }}">
+
             <style>
                 .avatar-sm {
                     width: 3rem;
