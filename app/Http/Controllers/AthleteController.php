@@ -37,21 +37,24 @@ class AthleteController extends Controller
      */
     public function store(Request $request)
     {
-
         $minDate = Carbon::now()->subYears(3)->format('Y-m-d');
 
-
-        $validator = Validator::make($request->all(), [
-            'full_name' => 'required|string|max:255',
-            'identity_document' => 'nullable|string|max:20',
+        $rules = [
+            'full_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z\s]+$/',
+            ],
+            'identity_document' => 'digits_between:6,8',
             'nationality' => 'nullable|string|max:100',
             'birth_date' => [
                 'date',
-                'before_or_equal:' . $minDate // Validación de edad mínima
+                'before_or_equal:' . $minDate,
             ],
             'gender' => 'required|in:M,F',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255|unique:users,email', // Añadida validación unique
+            'phone' => ['nullable', 'string', 'max:11', 'regex:/^[0-9\s\-+()]+$/'],
             'height' => 'nullable|numeric|between:0,300',
             'current_weight' => 'nullable|numeric|between:0,500',
             'shirt_size' => 'nullable|string|max:10',
@@ -59,19 +62,41 @@ class AthleteController extends Controller
             'shoe_size' => 'nullable|string|max:10',
             'medical_conditions' => 'nullable|string',
             'allergies' => 'nullable|string',
-            'emergency_contact_name' => 'nullable|string|max:255',
-            'emergency_contact_phone' => 'nullable|string|max:20',
-            'emergency_contact_relation' => 'nullable|string|max:100',
-        ]);
+            'emergency_contact_name' => [
+                'nullable',
+                'string',
+                'max:30',
+                'regex:/^[a-zA-Z\s]+$/',
+            ],
+            'emergency_contact_phone' => [
+                'nullable',
+                'string',
+                'max:11',
+                'regex:/^[0-9\s\-+()]+$/',
+            ],
+            'emergency_contact_relation' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[a-zA-Z\s]+$/',
+            ],
+        ];
 
-        $validator->after(function ($validator) use ($minDate) {
-            if ($validator->failed('birth_date')) {
-                $validator->errors()->add(
-                    'birth_date',
-                    "La fecha de nacimiento debe ser anterior a $minDate (mínimo 3 años de edad)"
-                );
-            }
-        });
+        $messages = [
+            'full_name.required' => 'El nombre completo es obligatorio.',
+            'full_name.regex' => 'El nombre completo solo puede contener letras y espacios.',
+            'full_name.max' => 'El nombre completo no puede tener más de 255 caracteres.',
+            'identity_document.regex' => 'El documento debe contener entre 6 y 8 dígitos numéricos.',
+            'email.email' => 'El email debe ser una direccion valida.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'birth_date.before_or_equal' => "La fecha de nacimiento debe ser anterior a $minDate (mínimo 3 años de edad).",
+            'phone.regex' => 'El número de teléfono solo puede contener números y caracteres como + - ()',
+            'emergency_contact_name.regex' => 'El nombre del contacto de emergencia solo puede contener letras y espacios.',
+            'emergency_contact_phone.regex' => 'El teléfono del contacto de emergencia solo puede contener números y caracteres como + - ().',
+            'emergency_contact_relation.regex' => 'La relación del contacto de emergencia solo puede contener letras y espacios.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -82,6 +107,7 @@ class AthleteController extends Controller
         try {
             DB::beginTransaction();
 
+            // Crear el atleta
             $athlete = Athlete::create([
                 'full_name' => $request->full_name,
                 'identity_document' => $request->identity_document,
@@ -102,11 +128,24 @@ class AthleteController extends Controller
                 'emergency_contact_relation' => $request->emergency_contact_relation,
             ]);
 
+            // Crear el grado inicial del atleta
             AthleteGrade::create([
                 'athlete_id' => $athlete->id,
                 'grade_id' => 1,
                 'date_achieved' => $request->grade_date_achieved,
             ]);
+
+            // Crear usuario si se proporcionó un correo electrónico
+            if ($request->email) {
+                $user = User::create([
+                    'name' => $request->full_name,
+                    'email' => $request->email,
+                    'password' => Hash::make('password')
+                ]);
+
+                // Asignar rol de atleta al usuario
+                $user->assignRole('athlete');
+            }
 
             DB::commit();
 
@@ -156,14 +195,18 @@ class AthleteController extends Controller
 
         $minDate = Carbon::now()->subYears(3)->format('Y-m-d');
 
-
         // Determine if athlete is minor
         $isMinor = $athlete->birth_date ? Carbon::parse($athlete->birth_date)->age < 18 : false;
 
         // Build validation rules
         $rules = [
-            'full_name' => 'required|string|max:255',
-            'identity_document' => 'nullable|string|max:20',
+            'full_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z\s]+$/',
+            ],
+            'identity_document' => 'digits_between:6,8',
             'nationality' => 'nullable|string|in:Venezolano,Extranjero',
             'birth_date' => [
                 'date',
@@ -176,7 +219,7 @@ class AthleteController extends Controller
             'academic_level' => 'nullable|string|in:Primaria,Secundaria,Técnico,Universitario,Postgrado',
             'institution' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:11', 'regex:/^[0-9\s\-+()]+$/'],
             'social_media' => 'nullable|string|max:255',
             'address_state' => 'nullable|string|max:100',
             'address_city' => 'nullable|string|max:100',
@@ -346,6 +389,23 @@ class AthleteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+
+    public function toggleStatus(string $id)
+    {
+        try {
+            $athlete = Athlete::findOrFail($id);
+            $athlete->status = !$athlete->status;
+            $athlete->save();
+
+            $statusText = $athlete->status ? 'activo' : 'inactivo';
+            return redirect()->back()
+                ->with('success', "Estado del atleta actualizado a {$statusText} exitosamente.");
+        } catch (\Exception $e) {
+            \Log::error('Error al cambiar el estado del atleta: ' . $e->getMessage());
+            return back()->with('error', 'Error al cambiar el estado del atleta.');
+        }
+    }
+
     public function destroy(string $id)
     {
         //

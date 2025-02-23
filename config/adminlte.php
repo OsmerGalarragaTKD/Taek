@@ -64,7 +64,7 @@ return [
     */
 
     'logo' => 'Escuela de Taekwondo "Juan José Rojas"',
-    'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+    'logo_img' => 'img/taek.jpg',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
@@ -86,7 +86,7 @@ return [
     'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'img/taek.jpg',
             'alt' => 'Auth Logo',
             'class' => '',
             'width' => 50,

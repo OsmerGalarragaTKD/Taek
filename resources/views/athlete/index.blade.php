@@ -77,9 +77,18 @@
                                             <td>{{ $athlete->email ?? 'No registrado' }}</td>
                                             <td>{{ $athlete->phone ?? 'No registrado' }}</td>
                                             <td class="text-center">
-                                                <span class="badge bg-success">Activo</span>
+                                                <form action="{{ route('athlete.toggle-status', $athlete->id) }}" 
+                                                      method="POST" 
+                                                      class="d-inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" 
+                                                            class="btn btn-sm {{ $athlete->status ? 'btn-success' : 'btn-danger' }}"
+                                                            title="Click para cambiar estado">
+                                                        {{ $athlete->status ? 'Activo' : 'Inactivo' }}
+                                                    </button>
+                                                </form>
                                             </td>
-                                            <!-- Add this button in the actions column of the table -->
                                             <td class="text-end px-4">
                                                 <a href="{{ route('athlete.show', $athlete->id) }}"
                                                     class="btn btn-sm btn-info me-2">
@@ -186,7 +195,6 @@
                         "orderable": false // No permitir ordenar
                     }]
                 });
-
 
                 // Auto-cerrar alertas después de 5 segundos
                 window.setTimeout(function() {

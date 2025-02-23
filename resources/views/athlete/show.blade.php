@@ -283,7 +283,7 @@
                                                             style="background-color: {{ $athlete->currentGrade->grade->color }}">
                                                         </div>
                                                         <div>
-                                                            <h6 class="mb-1">{{ $athlete->currentGrade->grade->name }}
+                                                            <h6 class="mb-1">{{ $athlete->currentGrade->grade->name. ' - '.$athlete->currentGrade->grade->color  }}
                                                             </h6>
                                                             <small class="text-muted">
                                                                 Obtenido el
@@ -311,7 +311,7 @@
                                                                     style="background-color: {{ $grade->grade->color }}">
                                                                 </div>
                                                                 <div class="timeline-content">
-                                                                    <h6 class="mb-1">{{ $grade->grade->name }}</h6>
+                                                                    <h6 class="mb-1">{{ $grade->grade->name.' - '.$grade->grade->color }}</h6>
                                                                     <small
                                                                         class="text-muted">{{ $grade->date_achieved?->format('d/m/Y') ?? 'No registrado' }}</small>
                                                                     @if ($grade->certificate_number)

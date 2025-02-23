@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/athlete/{id}/print-constancy', [AthleteController::class, 'printConstancy'])
     ->name('athlete.print-constancy');
 
+    Route::patch('/athletes/{id}/toggle-status', [AthleteController::class, 'toggleStatus'])->name('athlete.toggle-status');
+
 
 });
 
