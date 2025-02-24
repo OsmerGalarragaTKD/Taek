@@ -7,11 +7,16 @@ use App\Models\AthleteGrade;
 use App\Models\AthleteRepresentatives;
 use App\Models\BeltGrade;
 use App\Models\Representative;
+use App\Models\User;
+use App\Models\Venue;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AthleteController extends Controller
 {
@@ -20,8 +25,19 @@ class AthleteController extends Controller
      */
     public function index()
     {
-        $athletes = Athlete::all();
-        return view('athlete.index', compact('athletes'));
+        try {
+            $athletes = Athlete::with(['currentGrade.grade', 'primaryRepresentative.representative'])
+                ->get()
+                ->each(function ($athlete) {
+                    // Calcular edad dinámicamente
+                    $athlete->age = $athlete->birth_date ? $athlete->birth_date->age : 'N/A';
+                });
+
+            return view('athlete.index', compact('athletes'));
+        } catch (\Exception $e) {
+            Log::error('Error en index de atletas: ' . $e->getMessage());
+            return back()->with('error', 'Error al cargar la lista de atletas.');
+        }
     }
 
     /**
@@ -29,7 +45,14 @@ class AthleteController extends Controller
      */
     public function create()
     {
-        return view('athlete.create');
+        try {
+            $beltGrades = BeltGrade::orderBy('type')->orderBy('level')->get();
+            $venues = Venue::where('status', 'active')->get();
+            return view('athlete.create', compact('beltGrades', 'venues'));
+        } catch (\Exception $e) {
+            Log::error('Error en create de atletas: ' . $e->getMessage());
+            return back()->with('error', 'Error al cargar el formulario de creación.');
+        }
     }
 
     /**
@@ -40,63 +63,68 @@ class AthleteController extends Controller
         $minDate = Carbon::now()->subYears(3)->format('Y-m-d');
 
         $rules = [
+            'venue_id' => 'required|exists:venues,id', // Añade exists para validar integridad
             'full_name' => [
                 'required',
                 'string',
                 'max:255',
-                'regex:/^[a-zA-Z\s]+$/',
+                'regex:/^[\pL\s]+$/u',
             ],
-            'identity_document' => 'digits_between:6,8',
-            'nationality' => 'nullable|string|max:100',
+            'identity_document' => [
+                'nullable',
+                'string',
+                'regex:/^[VEJ]-?\d{6,8}$/i',
+                'unique:athletes,identity_document'
+            ],
+            'nationality' => 'nullable|string|in:Venezolano,Extranjero',
             'birth_date' => [
+                'required',
                 'date',
                 'before_or_equal:' . $minDate,
             ],
             'gender' => 'required|in:M,F',
-            'email' => 'nullable|email|max:255|unique:users,email', // Añadida validación unique
-            'phone' => ['nullable', 'string', 'max:11', 'regex:/^[0-9\s\-+()]+$/'],
-            'height' => 'nullable|numeric|between:0,300',
-            'current_weight' => 'nullable|numeric|between:0,500',
-            'shirt_size' => 'nullable|string|max:10',
+            'email' => 'nullable|email|max:255|unique:users,email',
+            'phone' => [
+                'nullable',
+                'string',
+                'max:15',
+                'regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/'
+            ],
+            'height' => 'nullable|numeric|between:50,300',
+            'current_weight' => 'nullable|numeric|between:10,500',
+            'shirt_size' => 'nullable|string|in:XS,S,M,L,XL,XXL',
             'pants_size' => 'nullable|string|max:10',
             'shoe_size' => 'nullable|string|max:10',
-            'medical_conditions' => 'nullable|string',
-            'allergies' => 'nullable|string',
+            'medical_conditions' => 'nullable|string|max:1000',
+            'allergies' => 'nullable|string|max:1000',
             'emergency_contact_name' => [
                 'nullable',
                 'string',
-                'max:30',
-                'regex:/^[a-zA-Z\s]+$/',
+                'max:255',
+                'regex:/^[\pL\s]+$/u'
             ],
             'emergency_contact_phone' => [
                 'nullable',
                 'string',
-                'max:11',
-                'regex:/^[0-9\s\-+()]+$/',
+                'max:15',
+                'regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/'
             ],
-            'emergency_contact_relation' => [
-                'nullable',
-                'string',
-                'max:100',
-                'regex:/^[a-zA-Z\s]+$/',
-            ],
+            'emergency_contact_relation' => 'nullable|string|max:50',
         ];
 
         $messages = [
-            'full_name.required' => 'El nombre completo es obligatorio.',
-            'full_name.regex' => 'El nombre completo solo puede contener letras y espacios.',
-            'full_name.max' => 'El nombre completo no puede tener más de 255 caracteres.',
-            'identity_document.regex' => 'El documento debe contener entre 6 y 8 dígitos numéricos.',
-            'email.email' => 'El email debe ser una direccion valida.',
-            'email.unique' => 'Este correo electrónico ya está registrado.',
-            'birth_date.before_or_equal' => "La fecha de nacimiento debe ser anterior a $minDate (mínimo 3 años de edad).",
-            'phone.regex' => 'El número de teléfono solo puede contener números y caracteres como + - ()',
-            'emergency_contact_name.regex' => 'El nombre del contacto de emergencia solo puede contener letras y espacios.',
-            'emergency_contact_phone.regex' => 'El teléfono del contacto de emergencia solo puede contener números y caracteres como + - ().',
-            'emergency_contact_relation.regex' => 'La relación del contacto de emergencia solo puede contener letras y espacios.',
+            'full_name.regex' => 'El nombre solo puede contener letras y espacios.',
+            'identity_document.regex' => 'El formato del documento de identidad no es válido (ej: V-12345678).',
+            'identity_document.unique' => 'Este documento de identidad ya está registrado.',
+            'birth_date.before_or_equal' => 'El atleta debe tener al menos 3 años de edad.',
+            'grade_date_achieved.before_or_equal' => 'La fecha de obtención del grado no puede ser futura.',
+            'phone.regex' => 'El formato del teléfono no es válido.',
+            'emergency_contact_name.regex' => 'El nombre del contacto solo puede contener letras y espacios.',
+            'emergency_contact_phone.regex' => 'El formato del teléfono de emergencia no es válido.',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
+
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -104,47 +132,32 @@ class AthleteController extends Controller
                 ->withInput();
         }
 
+
+
         try {
             DB::beginTransaction();
 
-            // Crear el atleta
-            $athlete = Athlete::create([
-                'full_name' => $request->full_name,
-                'identity_document' => $request->identity_document,
-                'nationality' => $request->nationality,
-                'birth_date' => $request->birth_date,
-                'gender' => $request->gender,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'height' => $request->height,
-                'current_weight' => $request->current_weight,
-                'shirt_size' => $request->shirt_size,
-                'pants_size' => $request->pants_size,
-                'shoe_size' => $request->shoe_size,
-                'medical_conditions' => $request->medical_conditions,
-                'allergies' => $request->allergies,
-                'emergency_contact_name' => $request->emergency_contact_name,
-                'emergency_contact_phone' => $request->emergency_contact_phone,
-                'emergency_contact_relation' => $request->emergency_contact_relation,
-            ]);
+            $athlete = Athlete::create($request->all());
+            $grade_date_achieved = now();
 
-            // Crear el grado inicial del atleta
             AthleteGrade::create([
                 'athlete_id' => $athlete->id,
-                'grade_id' => 1,
-                'date_achieved' => $request->grade_date_achieved,
+                'grade_id' => 1, // ID del grado blanco
+                'date_achieved' => $grade_date_achieved,
+                'certificate_number' => $request->grade_certificate_number,
             ]);
 
-            // Crear usuario si se proporcionó un correo electrónico
-            if ($request->email) {
+            if ($request->filled('email')) {
+                $temporaryPassword = 'password';
                 $user = User::create([
                     'name' => $request->full_name,
                     'email' => $request->email,
-                    'password' => Hash::make('password')
+                    'password' => Hash::make($temporaryPassword)
                 ]);
 
-                // Asignar rol de atleta al usuario
                 $user->assignRole('athlete');
+
+                // Aquí se podría enviar un email con la contraseña temporal
             }
 
             DB::commit();
@@ -153,10 +166,9 @@ class AthleteController extends Controller
                 ->with('success', 'Atleta registrado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error al ingresar atleta: ' . $e->getMessage());
-
+            Log::error('Error al registrar atleta: ' . $e->getMessage());
             return back()
-                ->with('error', 'Error al registrar al atleta: ' . $e->getMessage())
+                ->with('error', 'Error al registrar al atleta. Por favor, intente nuevamente.')
                 ->withInput();
         }
     }
@@ -166,24 +178,24 @@ class AthleteController extends Controller
      */
     public function show(string $id)
     {
-        $athlete = Athlete::with([
-            'currentGrade.grade',
-            'primaryRepresentative.representative',
-            'grades.grade'
-        ])->findOrFail($id);
+        try {
+            $athlete = Athlete::with([
+                'currentGrade.grade',
+                'primaryRepresentative.representative',
+                'grades.grade',
+                'athletesRepresenting.athlete'
+            ])->findOrFail($id);
 
-        $beltGrades = BeltGrade::orderBy('type')->orderBy('level')->get();
-        $isMinor = $athlete->birth_date ? Carbon::parse($athlete->birth_date)->age < 18 : false;
+            $venues = Venue::all();
 
-        return view('athlete.show', compact('athlete', 'beltGrades', 'isMinor'));
-    }
+            $beltGrades = BeltGrade::orderBy('type')->orderBy('level')->get();
+            $isMinor = $athlete->birth_date ? Carbon::parse($athlete->birth_date)->age < 18 : false;
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+            return view('athlete.show', compact('athlete', 'beltGrades', 'isMinor', 'venues'));
+        } catch (\Exception $e) {
+            Log::error('Error al mostrar atleta: ' . $e->getMessage());
+            return back()->with('error', 'Error al cargar la información del atleta.');
+        }
     }
 
     /**
@@ -192,25 +204,28 @@ class AthleteController extends Controller
     public function update(Request $request, string $id)
     {
         $athlete = Athlete::findOrFail($id);
-
         $minDate = Carbon::now()->subYears(3)->format('Y-m-d');
-
-        // Determine if athlete is minor
         $isMinor = $athlete->birth_date ? Carbon::parse($athlete->birth_date)->age < 18 : false;
 
-        // Build validation rules
         $rules = [
+            'venue_id' => 'required|exists:venues,id',
             'full_name' => [
                 'required',
                 'string',
                 'max:255',
-                'regex:/^[a-zA-Z\s]+$/',
+                'regex:/^[\pL\s]+$/u',
             ],
-            'identity_document' => 'digits_between:6,8',
+            'identity_document' => [
+                'nullable',
+                'string',
+                'regex:/^[VEJ]-?\d{6,8}$/i',
+                Rule::unique('athletes')->ignore($athlete->id),
+            ],
             'nationality' => 'nullable|string|in:Venezolano,Extranjero',
             'birth_date' => [
+                'required',
                 'date',
-                'before_or_equal:' . $minDate // Validación de edad mínima
+                'before_or_equal:' . $minDate,
             ],
             'birth_place' => 'nullable|string|max:255',
             'gender' => 'required|in:M,F',
@@ -218,38 +233,51 @@ class AthleteController extends Controller
             'profession' => 'nullable|string|max:255',
             'academic_level' => 'nullable|string|in:Primaria,Secundaria,Técnico,Universitario,Postgrado',
             'institution' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => ['nullable', 'string', 'max:11', 'regex:/^[0-9\s\-+()]+$/'],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+            ],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:15',
+                'regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/'
+            ],
             'social_media' => 'nullable|string|max:255',
             'address_state' => 'nullable|string|max:100',
             'address_city' => 'nullable|string|max:100',
             'address_details' => 'nullable|string|max:255',
-            'passport_number' => 'nullable|string|max:50',
-            'passport_expiry' => 'nullable|date',
-            'height' => 'nullable|numeric|between:0,300',
-            'current_weight' => 'nullable|numeric|between:0,500',
+            'height' => 'nullable|numeric|between:50,300',
+            'current_weight' => 'nullable|numeric|between:10,500',
             'shirt_size' => 'nullable|string|in:XS,S,M,L,XL,XXL',
             'pants_size' => 'nullable|string|max:10',
             'shoe_size' => 'nullable|string|max:10',
-            'medical_conditions' => 'nullable|string',
-            'allergies' => 'nullable|string',
-
-            // Belt grade validation
-            'belt_grade_id' => 'nullable|exists:belt_grades,id',
-            'grade_date_achieved' => 'required_with:belt_grade_id|date',
-            'grade_certificate_number' => 'required_with:belt_grade_id|string|max:50',
+            'medical_conditions' => 'nullable|string|max:1000',
+            'allergies' => 'nullable|string|max:1000',
+            'belt_grade_id' => 'required|exists:belt_grades,id',
+            'grade_date_achieved' => 'required|date|before_or_equal:today',
+            'grade_certificate_number' => 'required|string|max:50',
         ];
 
-        // Add representative validation rules if athlete is minor
+        // Reglas adicionales para representante si es menor de edad
         if ($isMinor) {
             $representativeRules = [
-                'representative_name' => 'required|string|max:255',
-                'representative_identity_document' => 'required|string|max:20',
+                'representative_name' => 'required|string|max:255|regex:/^[\pL\s]+$/u',
+                'representative_identity_document' => [
+                    'required',
+                    'string',
+                    'regex:/^[VEJ]-?\d{6,8}$/i',
+                ],
                 'representative_relationship' => 'required|string|in:Padre,Madre,Tutor',
                 'representative_nationality' => 'required|string|in:Venezolano,Extranjero',
-                'representative_birth_date' => 'required|date',
+                'representative_birth_date' => 'required|date|before:today',
                 'representative_profession' => 'nullable|string|max:255',
-                'representative_phone' => 'required|string|max:20',
+                'representative_phone' => [
+                    'required',
+                    'string',
+                    'regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/'
+                ],
                 'representative_email' => 'nullable|email|max:255',
             ];
             $rules = array_merge($rules, $representativeRules);
@@ -257,68 +285,48 @@ class AthleteController extends Controller
 
         $validator = Validator::make($request->all(), $rules);
 
-        $validator->after(function ($validator) use ($minDate) {
-            if ($validator->failed('birth_date')) {
-                $validator->errors()->add(
-                    'birth_date',
-                    "La fecha de nacimiento debe ser anterior a $minDate (mínimo 3 años de edad)"
-                );
-            }
-        });
 
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
+
         try {
             DB::beginTransaction();
 
-            // Update athlete basic information
-            $athlete->update($request->only([
-                'full_name',
-                'identity_document',
-                'nationality',
-                'birth_date',
-                'birth_place',
-                'gender',
-                'civil_status',
-                'profession',
-                'academic_level',
-                'institution',
-                'email',
-                'phone',
-                'social_media',
-                'address_state',
-                'address_city',
-                'address_details',
-                'passport_number',
-                'passport_expiry',
-                'height',
-                'current_weight',
-                'shirt_size',
-                'pants_size',
-                'shoe_size',
-                'medical_conditions',
-                'allergies'
+            // Actualizar información básica del atleta
+            $athlete->update($request->except([
+                'belt_grade_id',
+                'grade_date_achieved',
+                'grade_certificate_number',
+                'representative_name',
+                'representative_identity_document',
+                'representative_relationship',
+                'representative_nationality',
+                'representative_birth_date',
+                'representative_profession',
+                'representative_phone',
+                'representative_email',
             ]));
 
-            /*  dd([
-                'athlete_id' => $athlete->id,
-                'grade_id' => $request->belt_grade_id,
-                'date_achieved' => $request->grade_date_achieved,
-                'certificate_number' => $request->grade_certificate_number,
-            ]); */
+            // Crear nuevo grado si es diferente al actual
+            $currentGrade = $athlete->currentGrade;
+            if (
+                !$currentGrade ||
+                $currentGrade->grade_id != $request->belt_grade_id ||
+                $currentGrade->date_achieved->format('Y-m-d') != $request->grade_date_achieved
+            ) {
 
-            // Create new grade
-            AthleteGrade::create([
-                'athlete_id' => $athlete->id,
-                'grade_id' => $request->belt_grade_id,
-                'date_achieved' => $request->grade_date_achieved,
-            ]);
+                AthleteGrade::create([
+                    'athlete_id' => $athlete->id,
+                    'grade_id' => $request->belt_grade_id,
+                    'date_achieved' => $request->grade_date_achieved,
+                    'certificate_number' => $request->grade_certificate_number,
+                ]);
+            }
 
-
-            // Handle representative information for minors
+            // Actualizar información del representante si es menor de edad
             if ($isMinor && $request->filled('representative_name')) {
                 $representative = Representative::updateOrCreate(
                     ['identity_document' => $request->representative_identity_document],
@@ -332,9 +340,6 @@ class AthleteController extends Controller
                     ]
                 );
 
-
-
-                // Update or create primary representative relationship
                 AthleteRepresentatives::updateOrCreate(
                     [
                         'athlete_id' => $athlete->id,
@@ -347,67 +352,129 @@ class AthleteController extends Controller
                 );
             }
 
+            // Actualizar usuario si existe email
+            if ($request->filled('email')) {
+                $user = User::updateOrCreate(
+                    ['email' => $athlete->email],
+                    [
+                        'name' => $request->full_name,
+                        'email' => $request->email,
+                    ]
+                );
+
+                if (!$user->hasRole('athlete')) {
+                    $user->assignRole('athlete');
+                }
+            }
+
             DB::commit();
+
             return redirect()->route('athlete.show', $athlete->id)
                 ->with('success', 'Información actualizada exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error updating athlete: ' . $e->getMessage());
+            Log::error('Error actualizando atleta: ' . $e->getMessage());
             return back()
                 ->with('error', 'Error al actualizar la información. Por favor, intente nuevamente.')
                 ->withInput();
         }
     }
 
+    /**
+     * Toggle the status of the specified athlete.
+     */
+    public function toggleStatus(string $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $athlete = Athlete::findOrFail($id);
+
+            // Lógica mejorada para rotar entre estados
+            $newStatus = match ($athlete->status) {
+                'Active' => 'Inactive',
+                'Inactive' => 'Active',
+                default => 'Active' // Para otros estados no contemplados
+            };
+
+            $athlete->update(['status' => $newStatus]);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', "Estado actualizado a {$newStatus} correctamente");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error cambiando estado: ' . $e->getMessage());
+            return back()->with('error', 'Error al actualizar el estado');
+        }
+    }
+
+    /**
+     * Generate and return a PDF constancy for the specified athlete.
+     */
     public function printConstancy($id)
     {
         try {
-            $athlete = Athlete::findOrFail($id);
+            $athlete = Athlete::with(['currentGrade.grade'])->findOrFail($id);
 
-            // Calcular la edad
+            if (!$athlete->status) {
+                return back()->with('error', 'No se puede generar constancia para un atleta inactivo.');
+            }
+
             $age = $athlete->birth_date ? Carbon::parse($athlete->birth_date)->age : null;
 
             $pdf = PDF::loadView('athlete.constancy', [
                 'athlete' => $athlete,
-                'age' => $age
+                'age' => $age,
+                'printDate' => Carbon::now()->format('d/m/Y')
             ]);
 
-            // Configurar el PDF
             $pdf->setPaper('letter');
+            $filename = 'constancia_' . str_slug($athlete->full_name) . '_' . date('Y-m-d') . '.pdf';
 
-            // Nombre del archivo
-            $filename = 'constancia_' . str_replace(' ', '_', strtolower($athlete->full_name)) . '.pdf';
-
-            // Retornar el PDF para descarga
             return $pdf->stream($filename);
         } catch (\Exception $e) {
-            \Log::error('Error generando constancia: ' . $e->getMessage());
-            return back()->with('error', 'Error generando la constancia. Por favor, intente nuevamente.');
+            Log::error('Error generando constancia: ' . $e->getMessage());
+            return back()->with('error', 'Error al generar la constancia. Por favor, intente nuevamente.');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-
-    public function toggleStatus(string $id)
-    {
-        try {
-            $athlete = Athlete::findOrFail($id);
-            $athlete->status = !$athlete->status;
-            $athlete->save();
-
-            $statusText = $athlete->status ? 'activo' : 'inactivo';
-            return redirect()->back()
-                ->with('success', "Estado del atleta actualizado a {$statusText} exitosamente.");
-        } catch (\Exception $e) {
-            \Log::error('Error al cambiar el estado del atleta: ' . $e->getMessage());
-            return back()->with('error', 'Error al cambiar el estado del atleta.');
-        }
-    }
-
     public function destroy(string $id)
     {
-        //
+        try {
+            DB::beginTransaction();
+
+            $athlete = Athlete::findOrFail($id);
+
+            // Verificar si hay pagos pendientes
+            if ($athlete->payments()->where('status', 'Pending')->exists()) {
+                return back()->with('error', 'No se puede eliminar el atleta porque tiene pagos pendientes.');
+            }
+
+            // Eliminar registros relacionados
+            $athlete->grades()->delete();
+            $athlete->representatives()->delete();
+
+            // Eliminar usuario asociado si existe
+            if ($athlete->email) {
+                User::where('email', $athlete->email)->delete();
+            }
+
+            // Eliminar el atleta
+            $athlete->delete();
+
+            DB::commit();
+
+            return redirect()->route('athlete.index')
+                ->with('success', 'Atleta eliminado exitosamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al eliminar atleta: ' . $e->getMessage());
+            return back()->with('error', 'Error al eliminar el atleta. Por favor, intente nuevamente.');
+        }
     }
 }

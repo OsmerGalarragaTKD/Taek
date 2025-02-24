@@ -1,12 +1,10 @@
 @extends('layouts.app')
 
-
 @section('title', 'Detalles del Atleta')
 
 @section('content_header')
     <h1>Detalles del Atleta</h1>
 @stop
-
 
 @section('content')
     <div class="container py-4">
@@ -89,6 +87,13 @@
                                     <i class="bi bi-file-text me-2"></i>Documentos
                                 </a>
                             </li>
+                            @if($isMinor)
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#representatives" role="tab">
+                                    <i class="bi bi-person-vcard me-2"></i>Representantes
+                                </a>
+                            </li>
+                            @endif
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="tab" href="#martial-arts" role="tab">
                                     <i class="bi bi-award me-2"></i>Artes Marciales
@@ -118,8 +123,12 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Fecha de Nacimiento</label>
-                                            <span
-                                                class="fs-6">{{ $athlete->birth_date ? $athlete->birth_date->format('d/m/Y') : 'No registrado' }}</span>
+                                            <span class="fs-6">
+                                                {{ $athlete->birth_date ? $athlete->birth_date->format('d/m/Y') : 'No registrado' }}
+                                                @if($athlete->birth_date)
+                                                    (Edad: {{ $athlete->birth_date->age }} años)
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -130,8 +139,7 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Género</label>
-                                            <span
-                                                class="fs-6">{{ $athlete->gender == 'M' ? 'Masculino' : 'Femenino' }}</span>
+                                            <span class="fs-6">{{ $athlete->gender == 'M' ? 'Masculino' : 'Femenino' }}</span>
                                         </div>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Estado Civil</label>
@@ -169,13 +177,11 @@
                                         <h5 class="border-bottom pb-2">Medidas Físicas</h5>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Altura</label>
-                                            <span class="fs-6">{{ $athlete->height ?? 'No registrado' }}
-                                                cm</span>
+                                            <span class="fs-6">{{ $athlete->height ?? 'No registrado' }} cm</span>
                                         </div>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Peso Actual</label>
-                                            <span class="fs-6">{{ $athlete->current_weight ?? 'No registrado' }}
-                                                kg</span>
+                                            <span class="fs-6">{{ $athlete->current_weight ?? 'No registrado' }} kg</span>
                                         </div>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Talla de Camisa</label>
@@ -194,8 +200,7 @@
                                         <h5 class="border-bottom pb-2">Información Médica</h5>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Condiciones Médicas</label>
-                                            <span
-                                                class="fs-6">{{ $athlete->medical_conditions ?? 'No registrado' }}</span>
+                                            <span class="fs-6">{{ $athlete->medical_conditions ?? 'No registrado' }}</span>
                                         </div>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Alergias</label>
@@ -252,12 +257,48 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="text-muted d-block">Fecha de Vencimiento del Pasaporte</label>
-                                            <span
-                                                class="fs-6">{{ $athlete->passport_expiry ? date('d/m/Y', strtotime($athlete->passport_expiry)) : 'No registrado' }}</span>
+                                            <span class="fs-6">{{ $athlete->passport_expiry ? date('d/m/Y', strtotime($athlete->passport_expiry)) : 'No registrado' }}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Representantes (Nuevo Tab) -->
+                            @if($isMinor)
+                            <div class="tab-pane fade" id="representatives">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h5 class="border-bottom pb-2">Información del Representante</h5>
+                                        @if ($athlete->primaryRepresentative)
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="mb-3">
+                                                        {{ $athlete->primaryRepresentative->representative->full_name }}
+                                                    </h6>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted d-block">Documento de Identidad</small>
+                                                        <span>{{ $athlete->primaryRepresentative->representative->identity_document }}</span>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted d-block">Relación</small>
+                                                        <span>{{ $athlete->primaryRepresentative->relationship }}</span>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted d-block">Teléfono</small>
+                                                        <span>{{ $athlete->primaryRepresentative->representative->phone }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="alert alert-warning">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                                El atleta es menor de edad y requiere un representante
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
 
                             <!-- Información de Artes Marciales -->
                             <div class="tab-pane fade" id="martial-arts">
@@ -265,10 +306,18 @@
                                     <div class="col-md-6">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
                                             <h5 class="border-bottom pb-2">Grado y Categoría</h5>
-                                            {{-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#gradeModal">
-                                                <i class="bi bi-plus-circle me-2"></i>Añadir Grado
-                                            </button> --}}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="text-muted d-block">Sede</label>
+                                            <span class="fs-6">
+                                                @if($athlete->venue)
+                                                    {{ $athlete->venue->name }} 
+                                                    <small class="text-muted">({{ $athlete->venue->address_city }})</small>
+                                                @else
+                                                    No asignada
+                                                @endif
+                                            </span>
                                         </div>
 
                                         <!-- Grado Actual -->
@@ -279,15 +328,11 @@
                                             <div class="card-body">
                                                 @if ($athlete->currentGrade)
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="rounded-circle p-3"
-                                                            style="background-color: {{ $athlete->currentGrade->grade->color }}">
-                                                        </div>
+                                                        <div class="rounded-circle p-3" style="background-color: {{ $athlete->currentGrade->grade->color }}"></div>
                                                         <div>
-                                                            <h6 class="mb-1">{{ $athlete->currentGrade->grade->name. ' - '.$athlete->currentGrade->grade->color  }}
-                                                            </h6>
+                                                            <h6 class="mb-1">{{ $athlete->currentGrade->grade->name . ' - ' . $athlete->currentGrade->grade->color }}</h6>
                                                             <small class="text-muted">
-                                                                Obtenido el
-                                                                {{ $athlete->currentGrade->date_achieved?->format('d/m/Y')  ?? 'No registrado' }}
+                                                                Obtenido el {{ $athlete->currentGrade->date_achieved?->format('d/m/Y') ?? 'No registrado' }}
                                                             </small>
                                                         </div>
                                                     </div>
@@ -307,17 +352,13 @@
                                                     <div class="timeline">
                                                         @foreach ($athlete->grades->sortByDesc('date_achieved') as $grade)
                                                             <div class="timeline-item">
-                                                                <div class="timeline-marker"
-                                                                    style="background-color: {{ $grade->grade->color }}">
-                                                                </div>
+                                                                <div class="timeline-marker" style="background-color: {{ $grade->grade->color }}"></div>
                                                                 <div class="timeline-content">
-                                                                    <h6 class="mb-1">{{ $grade->grade->name.' - '.$grade->grade->color }}</h6>
-                                                                    <small
-                                                                        class="text-muted">{{ $grade->date_achieved?->format('d/m/Y') ?? 'No registrado' }}</small>
+                                                                    <h6 class="mb-1">{{ $grade->grade->name . ' - ' . $grade->grade->color }}</h6>
+                                                                    <small class="text-muted">{{ $grade->date_achieved?->format('d/m/Y') ?? 'No registrado' }}</small>
                                                                     @if ($grade->certificate_number)
                                                                         <br>
-                                                                        <small class="text-muted">Certificado:
-                                                                            {{ $grade->certificate_number }}</small>
+                                                                        <small class="text-muted">Certificado: {{ $grade->certificate_number }}</small>
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -331,69 +372,34 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <h5 class="border-bottom pb-2">Representante / Representados</h5>
-                                        @if ($isMinor)
-                                            @if ($athlete->primaryRepresentative)
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <h6 class="mb-3">
-                                                            {{ $athlete->primaryRepresentative->representative->full_name }}
-                                                        </h6>
-                                                        <div class="mb-2">
-                                                            <small class="text-muted d-block">Documento de
-                                                                Identidad</small>
-                                                            <span>{{ $athlete->primaryRepresentative->representative->identity_document }}</span>
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <small class="text-muted d-block">Relación</small>
-                                                            <span>{{ $athlete->primaryRepresentative->relationship }}</span>
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <small class="text-muted d-block">Teléfono</small>
-                                                            <span>{{ $athlete->primaryRepresentative->representative->phone }}</span>
-                                                        </div>
-                                                    </div>
+                                        @if(!$isMinor)
+                                        <h5 class="border-bottom pb-2">Atletas que Representa</h5>
+                                        @if ($athlete->athletesRepresenting->isNotEmpty())
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0">Atletas que Representa</h6>
                                                 </div>
-                                            @else
-                                                <div class="alert alert-warning">
-                                                    <i class="bi bi-exclamation-triangle me-2"></i>
-                                                    El atleta es menor de edad y requiere un representante
-                                                </div>
-                                            @endif
-                                        @else
-                                            @if ($athlete->athletesRepresenting->isNotEmpty())
-                                                <div class="card">
-                                                    <div class="card-header">
-                                                        <h6 class="mb-0">Atletas que Representa</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="list-group list-group-flush">
-                                                            @foreach ($athlete->athletesRepresenting as $representation)
-                                                                <div class="list-group-item">
-                                                                    <div
-                                                                        class="d-flex justify-content-between align-items-center">
-                                                                        <div>
-                                                                            <h6 class="mb-1">
-                                                                                {{ $representation->athlete->full_name }}
-                                                                            </h6>
-                                                                            <small class="text-muted">
-                                                                                {{ $representation->relationship }}
-                                                                            </small>
-                                                                        </div>
-                                                                        <a href="{{ route('athlete.show', $representation->athlete->id) }}"
-                                                                            class="btn btn-sm btn-outline-primary">
-                                                                            <i class="bi bi-eye me-1"></i>Ver
-                                                                        </a>
+                                                <div class="card-body">
+                                                    <div class="list-group list-group-flush">
+                                                        @foreach ($athlete->athletesRepresenting as $representation)
+                                                            <div class="list-group-item">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <div>
+                                                                        <h6 class="mb-1">{{ $representation->athlete->full_name }}</h6>
+                                                                        <small class="text-muted">{{ $representation->relationship }}</small>
                                                                     </div>
+                                                                    <a href="{{ route('athlete.show', $representation->athlete->id) }}" class="btn btn-sm btn-outline-primary">
+                                                                        <i class="bi bi-eye me-1"></i>Ver
+                                                                    </a>
                                                                 </div>
-                                                            @endforeach
-                                                        </div>
+                                                            </div>
+                                                        @endforeach
                                                     </div>
                                                 </div>
-                                            @else
-                                                <p class="text-muted">El atleta no es representante de ningún otro atleta
-                                                </p>
-                                            @endif
+                                            </div>
+                                        @else
+                                            <p class="text-muted">El atleta no es representante de ningún otro atleta</p>
+                                        @endif
                                         @endif
                                     </div>
                                 </div>
@@ -639,6 +645,21 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label">Sede</label>
+                                <select class="form-select @error('venue_id') is-invalid @enderror" name="venue_id" required>
+                                    <option value="">Seleccionar sede</option>
+                                    @foreach($venues as $venue)
+                                        <option value="{{ $venue->id }}" 
+                                            {{ $athlete->venue_id == $venue->id ? 'selected' : '' }}>
+                                            {{ $venue->name }} - {{ $venue->address_city }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('venue_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Fecha de Obtención *</label>
                                 <input type="date" class="form-control @error('grade_date_achieved') is-invalid @enderror" 
                                        name="grade_date_achieved" required
@@ -770,8 +791,6 @@
             </div>
         </div>
     </div>
-    </div>
-
 @endsection
 
 

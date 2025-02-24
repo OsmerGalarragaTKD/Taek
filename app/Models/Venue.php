@@ -25,4 +25,9 @@ class Venue extends Model
     protected $casts = [
         'founding_date' => 'date',
     ];
+
+    public function athletes()
+    {
+        return $this->hasMany(Athlete::class);
+    }
 }

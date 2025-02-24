@@ -13,6 +13,7 @@ class Payment extends Model
         'athlete_id',
         'event_id', // Nuevo campo para asociar el pago a un evento
         'payment_type',
+        'month',
         'amount',
         'status',
         'payment_date',

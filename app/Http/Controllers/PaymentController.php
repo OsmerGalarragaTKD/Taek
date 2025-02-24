@@ -36,13 +36,16 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
+
         $request->validate([
             'athlete_id' => 'required|exists:athletes,id',
             'payment_type' => 'required|string',
-            'event_id' => 'required_if:payment_type,Event_Registration|exists:events,id',
+            'month' => 'required_if:payment_type,Monthly|date_format:Y-m',
+            'event_id' => 'nullable|required_if:payment_type,Event_Registration|exists:events,id',
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
         ]);
+
 
         try {
             DB::beginTransaction();
@@ -80,6 +83,7 @@ class PaymentController extends Controller
                 'athlete_id' => $request->athlete_id,
                 'event_id' => $request->payment_type === 'Event_Registration' ? $request->event_id : null,
                 'payment_type' => $request->payment_type,
+                'month' => $request->payment_type === 'Monthly' ? $request->month . '-01' : null,
                 'amount' => $request->amount,
                 'status' => 'Completed',
                 'payment_date' => $request->payment_date,
@@ -171,10 +175,10 @@ class PaymentController extends Controller
      */
     public function pending()
     {
-        $pendingPayments = Payment::where('status', 'Pending')
+        $payments = Payment::where('status', 'Pending')
             ->with('athlete')
             ->get();
-        return view('payments.pending', compact('pendingPayments'));
+        return view('payments.pending', compact('payments'));
     }
 
     /**
@@ -288,6 +292,7 @@ class PaymentController extends Controller
             'amount' => 'required',
             'payment_date' => 'required|date',
             'payment_type' => 'required',
+            'month' => 'required_if:payment_type,Monthly|date_format:Y-m',
             'payment_method' => 'required',
             'reference_number' => 'nullable',
             'receipt_url' => 'nullable|image|mimes:jpeg,png,jpg|max:20480',
@@ -318,6 +323,7 @@ class PaymentController extends Controller
                 'amount' => $request->amount,
                 'payment_date' => $request->payment_date,
                 'payment_type' => $request->payment_type,
+                'month' => $request->payment_type === 'Monthly' ? $request->month . '-01' : null,
                 'payment_method' => $request->payment_method,
                 'reference_number' => $request->reference_number,
                 'receipt_url' => $receipt_path,

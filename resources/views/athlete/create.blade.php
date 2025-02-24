@@ -117,6 +117,25 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label for="venue_id" class="form-label">Sede <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('venue_id') is-invalid @enderror" 
+                                            id="venue_id" 
+                                            name="venue_id" 
+                                            required>
+                                        <option value="">Seleccionar sede</option>
+                                        @foreach($venues as $venue)
+                                            <option value="{{ $venue->id }}" 
+                                                {{ old('venue_id') == $venue->id ? 'selected' : '' }}>
+                                                {{ $venue->name }} - {{ $venue->address_city }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('venue_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
                                     <label for="phone" class="form-label">Teléfono</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-telephone"></i></span>
@@ -128,6 +147,23 @@
                                                pattern="[0-9+\-()\s]{8,15}"
                                                title="Formato válido: +58 412-1234567">
                                         @error('phone')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Correo Electrónico</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" 
+                                               class="form-control @error('email') is-invalid @enderror" 
+                                               id="email" 
+                                               name="email" 
+                                               value="{{ old('email') }}"
+                                               placeholder="ejemplo@dominio.com"
+                                               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+                                        @error('email')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>

@@ -10,6 +10,7 @@ class Athlete extends Model
     use HasFactory;
 
     protected $fillable = [
+        'venue_id',
         'full_name',
         'identity_document',
         'nationality',
@@ -39,6 +40,7 @@ class Athlete extends Model
         'pants_size',
         'shoe_size',
         'has_passport',
+        'passport_number',
         'passport_expiry',
         'status',
     ];
@@ -49,6 +51,11 @@ class Athlete extends Model
         'social_media' => 'array', // Si 'social_media' es un campo JSON
         'has_passport' => 'boolean',
     ];
+
+    public function venue()
+    {
+        return $this->belongsTo(Venue::class, 'venue_id');
+    }
 
     public function grades()
     {

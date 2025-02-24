@@ -45,7 +45,9 @@
                                     <tr>
                                         <th scope="col" class="px-4">Nombre</th>
                                         <th scope="col">Documento</th>
-                                        <th scope="col">Email</th>
+                                        <th scope="col">Edad</th>
+                                        <th scope="col">Grado</th>
+                                        <th scope="col">Sede</th>
                                         <th scope="col">Teléfono</th>
                                         <th scope="col" class="text-center">Estado</th>
                                         <th scope="col" class="text-end px-4">Acciones</th>
@@ -74,18 +76,44 @@
                                                 </div>
                                             </td>
                                             <td>{{ $athlete->identity_document ?? 'No registrado' }}</td>
-                                            <td>{{ $athlete->email ?? 'No registrado' }}</td>
+                                            <td>
+                                                @if($athlete->birth_date)
+                                                    {{ $athlete->birth_date->age }} años
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            
+                                            <!-- Nueva columna de Cinturón -->
+                                            <td>
+                                                @if($athlete->currentGrade && $athlete->currentGrade->grade)
+                                                    <span class="badge-grade" 
+                                                          {{-- style="background-color: {{ $athlete->currentGrade->grade->color }};
+                                                                 color: {{ getContrastColor($athlete->currentGrade->grade->color) }}" --}}
+                                                    >
+                                                        {{ $athlete->currentGrade->grade->name }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-muted">N/A</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($athlete->venue_id)
+                                                    {{ $athlete->venue->name }} años
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
                                             <td>{{ $athlete->phone ?? 'No registrado' }}</td>
                                             <td class="text-center">
-                                                <form action="{{ route('athlete.toggle-status', $athlete->id) }}" 
-                                                      method="POST" 
-                                                      class="d-inline">
+                                                <form action="{{ route('athlete.toggle-status', $athlete->id) }}"
+                                                    method="POST" class="d-inline">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <button type="submit" 
-                                                            class="btn btn-sm {{ $athlete->status ? 'btn-success' : 'btn-danger' }}"
-                                                            title="Click para cambiar estado">
-                                                        {{ $athlete->status ? 'Activo' : 'Inactivo' }}
+                                                    <button type="submit"
+                                                        class="btn btn-sm {{ $athlete->status === 'Active' ? 'btn-success' : ($athlete->status === 'Inactive' ? 'btn-danger' : 'btn-warning') }}"
+                                                        title="Click para cambiar estado">
+                                                        {{ $athlete->status }}
                                                     </button>
                                                 </form>
                                             </td>
@@ -149,6 +177,17 @@
 
             .pagination {
                 margin-bottom: 0;
+            }
+
+            .badge-grade {
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.85em;
+                font-weight: 500;
+                display: inline-block;
+                min-width: 80px;
+                text-align: center;
+                text-transform: uppercase;
             }
         </style>
     @endpush
