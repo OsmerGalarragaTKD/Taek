@@ -49,18 +49,23 @@ class HomeController extends Controller
 
         // Ingresos Mensuales del Año Actual
         $monthlyIncomes = Payment::select(
-            DB::raw('MONTH(payment_date) as month'),
-            DB::raw('SUM(amount) as total')
+            DB::raw('YEAR(payment_date) as year'), // Extraer el año
+            DB::raw('MONTH(payment_date) as mes'), // Extraer el mes
+            DB::raw('SUM(amount) as total') // Sumar los montos
         )
-            ->whereYear('payment_date', date('Y'))
-            ->where('status', 'Completed')
-            ->groupBy('month')
-            ->orderBy('month')
+            ->whereYear('payment_date', date('Y')) // Filtrar por el año actual
+            ->where('status', 'Completed') // Filtrar por pagos completados
+            ->groupBy('year', 'mes') // Agrupar por año y mes
+            ->orderBy('year') // Ordenar por año
+            ->orderBy('mes') // Ordenar por mes
             ->get()
             ->map(function ($item) {
+                // Crear una fecha con el año y mes extraídos
+                $date = Carbon::create($item->year, $item->month, 1);
+
                 return [
-                    'month' => Carbon::create()->month($item->month)->format('M'),
-                    'total' => $item->total
+                    'month' => $date->format('M Y'), // Formatear como "Mes Año" (ej. "Jan 2024")
+                    'total' => $item->total // Mantener el total
                 ];
             });
 
