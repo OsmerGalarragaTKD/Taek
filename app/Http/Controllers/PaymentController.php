@@ -114,10 +114,10 @@ class PaymentController extends Controller
 
     public function pending()
     {
-        $pago = Payment::where('status', 'Pending')
+        $payments = Payment::where('status', 'Pending')
             ->with('athlete')
             ->get();
-        return view('payments.pending', compact('pago'));
+        return view('payments.pending', compact('payments'));
     }
 
     /**
