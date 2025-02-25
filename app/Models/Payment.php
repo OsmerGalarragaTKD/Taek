@@ -20,7 +20,8 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'payment_date' => 'datetime',
+        'month' => 'date', // Convierte 'month' en un objeto Carbon
+        'payment_date' => 'datetime', // Esto ya lo tienes
     ];
 
     // Relación con el atleta

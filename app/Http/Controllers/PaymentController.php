@@ -8,22 +8,18 @@ use App\Models\EventRegistration;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $payments = Payment::all();
+        $payments = Payment::with(['athlete', 'event'])->latest()->paginate(15);
         return view('payments.index', compact('payments'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $athletes = Athlete::all();
@@ -31,54 +27,58 @@ class PaymentController extends Controller
         return view('payments.create', compact('athletes', 'events'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function getAvailableEvents($athleteId)
+    {
+        $athlete = Athlete::findOrFail($athleteId);
+        $events = Event::select('events.*', 'event_categories.registration_fee')
+            ->join('event_registrations', 'events.id', '=', 'event_registrations.event_id')
+            ->join('event_categories', function ($join) {
+                $join->on('events.id', '=', 'event_categories.event_id')
+                    ->on('event_registrations.category_id', '=', 'event_categories.category_id');
+            })
+            ->where('events.status', 'Planned')
+            ->where('event_registrations.athlete_id', $athleteId)
+            ->where('event_registrations.payment_status', '!=', 'Completed')
+            ->whereDoesntHave('payments', function ($query) use ($athleteId) {
+                $query->where('athlete_id', $athleteId)
+                    ->where('status', 'Completed');
+            })
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $events
+        ]);
+    }
+
     public function store(Request $request)
     {
-
-        $request->validate([
+        $rules = [
             'athlete_id' => 'required|exists:athletes,id',
-            'payment_type' => 'required|string',
-            'month' => 'required_if:payment_type,Monthly|date_format:Y-m',
-            'event_id' => 'nullable|required_if:payment_type,Event_Registration|exists:events,id',
+            'payment_type' => 'required|in:Monthly_Fee,Event_Registration,Equipment',
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
-        ]);
+        ];
 
+        // Reglas condicionales basadas en el tipo de pago
+        if ($request->payment_type === 'Monthly_Fee') {
+            $rules['month'] = 'required|date_format:Y-m';
+        } elseif ($request->payment_type === 'Event_Registration') {
+            $rules['event_id'] = 'required|exists:events,id';
+        }
+
+        // Validar el request
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         try {
             DB::beginTransaction();
 
-            // Verificar si es un pago de evento
-            if ($request->payment_type === 'Event_Registration') {
-                // Verificar si el atleta está registrado en el evento
-                $eventRegistration = EventRegistration::where([
-                    'event_id' => $request->event_id,
-                    'athlete_id' => $request->athlete_id,
-                ])->first();
-
-                if (!$eventRegistration) {
-                    return redirect()->back()
-                        ->with('error', 'El atleta no está registrado en este evento.')
-                        ->withInput();
-                }
-
-                // Verificar si el atleta ya pagó este evento
-                $existingPayment = Payment::where([
-                    'athlete_id' => $request->athlete_id,
-                    'event_id' => $request->event_id,
-                    'status' => 'Completed'
-                ])->exists();
-
-                if ($existingPayment) {
-                    return redirect()->back()
-                        ->with('error', 'El atleta ya tiene un pago completado para este evento.')
-                        ->withInput();
-                }
-            }
-
-            // Crear el pago
             $payment = Payment::create([
                 'athlete_id' => $request->athlete_id,
                 'event_id' => $request->payment_type === 'Event_Registration' ? $request->event_id : null,
@@ -89,96 +89,35 @@ class PaymentController extends Controller
                 'payment_date' => $request->payment_date,
             ]);
 
-            // Solo actualizar el estado del registro de evento si el pago está completado
-            if ($request->payment_type === 'Event_Registration') {
-                $eventRegistration->update([
-                    'payment_status' => 'Completed'
-                ]);
+
+            if ($payment->payment_type === 'Event_Registration') {
+                EventRegistration::updateOrCreate(
+                    ['event_id' => $request->event_id, 'athlete_id' => $request->athlete_id],
+                    ['payment_status' => 'Completed']
+                );
             }
+
+
 
             DB::commit();
 
-            return redirect()->route('payments.index')
-                ->with('success', 'Pago registrado exitosamente.');
+            return redirect()->back()
+                ->with('success', 'Pago aprobado exitosamente');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error al registrar el pago: ' . $e->getMessage());
-
             return redirect()->back()
-                ->with('error', 'Ocurrió un error al registrar el pago.')
+                ->with('error', 'Ocurrió un error al registrar el pago: ' . $e->getMessage())
                 ->withInput();
         }
     }
 
-
-
-    // Agregar este nuevo método para obtener eventos disponibles
-    public function getAvailableEvents($athleteId)
-    {
-        try {
-            $athlete = Athlete::findOrFail($athleteId);
-
-            // Obtener eventos con sus costos de registro
-            $events = Event::select('events.*', 'event_categories.registration_fee')
-                ->join('event_registrations', 'events.id', '=', 'event_registrations.event_id')
-                ->join('event_categories', function ($join) {
-                    $join->on('events.id', '=', 'event_categories.event_id')
-                        ->on('event_registrations.category_id', '=', 'event_categories.category_id');
-                })
-                ->where('events.status', 'Planned')
-                ->where('event_registrations.athlete_id', $athleteId)
-                ->where('event_registrations.payment_status', '!=', 'Completed')
-                ->whereDoesntHave('payments', function ($query) use ($athleteId) {
-                    $query->where('athlete_id', $athleteId)
-                        ->where('status', 'Completed');
-                })
-                ->get();
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $events
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error al obtener eventos: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error al obtener eventos: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $pago = Payment::findOrFail($id);
-        return view('payments.show', compact('pago'));
-    }
-
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Mostrar pagos pendientes.
-     */
     public function pending()
     {
-        $payments = Payment::where('status', 'Pending')
+        $pago = Payment::where('status', 'Pending')
             ->with('athlete')
             ->get();
-        return view('payments.pending', compact('payments'));
+        return view('payments.pending', compact('pago'));
     }
 
     /**
@@ -285,19 +224,24 @@ class PaymentController extends Controller
         }
     }
 
-    // ... actualizar el método update existente ...
+
+    public function show(string $id)
+    {
+        $pago = Payment::with(['athlete', 'event'])->findOrFail($id);
+        return view('payments.show', compact('pago'));
+    }
+
     public function update(Request $request, string $id)
     {
         $validator = Validator::make($request->all(), [
-            'amount' => 'required',
+            'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
-            'payment_type' => 'required',
-            'month' => 'required_if:payment_type,Monthly|date_format:Y-m',
-            'payment_method' => 'required',
-            'reference_number' => 'nullable',
-            'receipt_url' => 'nullable|image|mimes:jpeg,png,jpg|max:20480',
-            'notes' => 'nullable',
-            'status' => 'required|in:Pending,Completed,Cancelled'
+            'payment_type' => 'required|in:Monthly_Fee,Event_Registration,Equipment,Other',
+            'payment_method' => 'required|in:Cash,Transfer,Card',
+            'reference_number' => 'nullable|string',
+            'status' => 'required|in:Pending,Completed,Cancelled',
+            'notes' => 'nullable|string',
+            'receipt_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -311,151 +255,115 @@ class PaymentController extends Controller
 
             $payment = Payment::findOrFail($id);
             $oldStatus = $payment->status;
-            $receipt_path = $payment->receipt_url;
 
-            if ($request->hasFile('receipt_url')) {
-                // Manejar la subida del archivo...
-                // [Código existente para manejar el archivo...]
-            }
+            $this->handleFileUpload($request, $payment);
+            $this->updatePaymentDetails($request, $payment, $oldStatus);
 
-            // Actualizar el pago
-            $payment->update([
-                'amount' => $request->amount,
-                'payment_date' => $request->payment_date,
-                'payment_type' => $request->payment_type,
-                'month' => $request->payment_type === 'Monthly' ? $request->month . '-01' : null,
-                'payment_method' => $request->payment_method,
-                'reference_number' => $request->reference_number,
-                'receipt_url' => $receipt_path,
-                'notes' => $request->notes,
-                'status' => $request->status
-            ]);
-
-            // Si el estado cambió a Completed y es un pago de evento
-            if (
-                $oldStatus !== 'Completed' && $request->status === 'Completed' &&
-                $payment->payment_type === 'Event_Registration' && $payment->event_id
-            ) {
-
-                // Buscar y actualizar el registro del evento
-                $eventRegistration = EventRegistration::where([
-                    'event_id' => $payment->event_id,
-                    'athlete_id' => $payment->athlete_id
-                ])->first();
-
-                if ($eventRegistration) {
-                    $eventRegistration->update([
-                        'payment_status' => 'Completed'
-                    ]);
-                } else {
-                    \Log::warning("Pago ID {$payment->id}: El atleta no está registrado en el evento ID {$payment->event_id}");
-                }
+            if ($payment->wasChanged(['amount', 'payment_date', 'payment_type', 'payment_method', 'reference_number'])) {
+                $receiptPath = $this->generateAndStoreReceipt($payment);
+                $payment->update(['receipt_pdf' => $receiptPath]);
             }
 
             DB::commit();
-            return redirect()->back()
-                ->with('success', 'Pago actualizado exitosamente');
+            return redirect()->route('payments.show', $payment->id)
+                ->with('success', 'Pago actualizado exitosamente y recibo regenerado si fue necesario.');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error("Error al actualizar pago: " . $e->getMessage());
             return redirect()->back()
-                ->with('error', 'Ocurrió un error al actualizar el pago: ' . $e->getMessage());
-        }
-    }
-
-    public function userPayment()
-    {
-        return view('payments.user-payment');
-    }
-
-    public function userStore(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'athlete_id' => 'required',
-            'amount' => 'required|numeric|min:0',
-            'payment_date' => 'required|date',
-            'payment_type' => 'required',
-            'payment_method' => 'required|in:Transfer,Card',
-            'reference_number' => 'required',
-            'receipt_url' => 'required|image|mimes:jpeg,png,jpg|max:20480',
-            'notes' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', 'Ocurrió un error al actualizar el pago: ' . $e->getMessage())
                 ->withInput();
         }
+    }
 
-        try {
-            DB::beginTransaction();
-
-            $receipt_path = null;
-
-            if ($request->hasFile('receipt_url')) {
-                $file = $request->file('receipt_url');
-                $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-
-                // Asegurarse de que el directorio existe
-                $storage_path = storage_path('app/public/receipts');
-                if (!file_exists($storage_path)) {
-                    mkdir($storage_path, 0755, true);
-                }
-
-                // Mover el archivo directamente
-                $file->move($storage_path, $filename);
-                $receipt_path = 'receipts/' . $filename;
-
-                // Verificar que el archivo se movió correctamente
-                if (!file_exists($storage_path . '/' . $filename)) {
-                    throw new \Exception('Error al guardar el archivo');
-                }
+    private function handleFileUpload(Request $request, Payment $payment)
+    {
+        if ($request->hasFile('receipt_url')) {
+            if ($payment->receipt_url) {
+                Storage::delete($payment->receipt_url);
             }
-
-            Payment::create([
-                'athlete_id' => $request->athlete_id,
-                'amount' => $request->amount,
-                'payment_date' => $request->payment_date,
-                'payment_type' => $request->payment_type,
-                'payment_method' => $request->payment_method,
-                'reference_number' => $request->reference_number,
-                'receipt_url' => $receipt_path,
-                'notes' => $request->notes,
-                'status' => 'Pending', // Los pagos de usuarios comienzan como pendientes
-            ]);
-
-            DB::commit();
-            return redirect()->route('dashboard')
-                ->with('success', 'Pago registrado exitosamente. Será revisado por un administrador.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error("Error al registrar pago de usuario: " . $e->getMessage());
-            return redirect()->back()
-                ->with('error', 'Ocurrió un error al registrar el pago: ' . $e->getMessage());
+            $path = $request->file('receipt_url')->store('receipts', 'public');
+            $payment->receipt_url = $path;
         }
     }
 
-    private function checkStorageStructure()
+    private function updatePaymentDetails(Request $request, Payment $payment, $oldStatus)
     {
-        $paths = [
-            storage_path('app/public'),
-            storage_path('app/public/receipts'),
-            public_path('storage'),
-            public_path('storage/receipts')
-        ];
+        $payment->fill($request->only([
+            'amount',
+            'payment_date',
+            'payment_type',
+            'payment_method',
+            'reference_number',
+            'status',
+            'notes'
+        ]));
 
-        foreach ($paths as $path) {
-            if (!file_exists($path)) {
-                mkdir($path, 0755, true);
+        if ($oldStatus !== 'Completed' && $request->status === 'Completed') {
+            $payment->completed_at = now();
+            $this->updateEventRegistration($payment);
+        }
+
+        $payment->save();
+    }
+
+    private function updateEventRegistration(Payment $payment)
+    {
+        if ($payment->payment_type === 'Event_Registration') {
+            $eventRegistration = EventRegistration::where([
+                'event_id' => $payment->event_id,
+                'athlete_id' => $payment->athlete_id
+            ])->first();
+
+            if ($eventRegistration) {
+                $eventRegistration->update(['payment_status' => 'Completed']);
             }
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function generateReceipt($id)
     {
-        //
+        $payment = Payment::with(['athlete', 'event'])->findOrFail($id);
+
+        if (!in_array($payment->payment_type, ['Monthly_Fee', 'Event_Registration'])) {
+            return redirect()->back()->with('error', 'Solo se pueden generar recibos para pagos de mensualidades y eventos.');
+        }
+
+        if ($payment->receipt_pdf) {
+            return response()->file(storage_path('app/public/' . $payment->receipt_pdf));
+        }
+
+        $pdf = Pdf::loadView('payments.receipt', compact('payment'));
+        $receiptPath = $this->generateAndStoreReceipt($payment);
+
+        return response()->file(storage_path('app/public/' . $receiptPath));
+    }
+
+    private function generateReceiptFileName(Payment $payment)
+    {
+        $prefix = $payment->payment_type === 'Monthly_Fee' ? 'mensualidad' : 'evento';
+        $date = $payment->payment_date->format('Y-m-d');
+        return "recibo-{$prefix}-{$payment->id}-{$date}.pdf";
+    }
+
+    private function generateAndStoreReceipt(Payment $payment)
+    {
+        $pdf = Pdf::loadView('payments.receipt', compact('payment'));
+        $fileName = $this->generateReceiptFileName($payment);
+        $path = 'receipts/' . $fileName;
+
+        Storage::disk('public')->put($path, $pdf->output());
+
+        return $path;
+    }
+
+    private function generateAndDownloadReceipt(Payment $payment)
+    {
+        $payment->load(['athlete', 'event']); // Asegurarse de que las relaciones estén cargadas
+
+        $pdf = Pdf::loadView('payments.receipt', compact('payment'));
+
+        $fileName = "recibo-" . ($payment->payment_type === 'Monthly_Fee' ? 'mensualidad' : 'evento') . "-{$payment->id}.pdf";
+
+        return $pdf->download($fileName);
     }
 }

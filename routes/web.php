@@ -26,9 +26,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Add the approve-single route
+    Route::post('/payments/{id}/approve', [PaymentController::class, 'approveSingle'])->name('payments.approve-single');
+
+    // Add the approve-bulk route
+    Route::post('/payments/approve-bulk', [PaymentController::class, 'approveBulk'])->name('payments.approve-bulk');
+
+    // Add the pending payments route
     Route::get('/payments/pending', [PaymentController::class, 'pending'])->name('payments.pending');
-    Route::post('/payments/{id}/approve', [PaymentController::class, 'approveSingle'])->name('payments.approve.single');
-    Route::post('/payments/approve-bulk', [PaymentController::class, 'approveBulk'])->name('payments.approve.bulk');
+
     Route::resource('documents', DocumentController::class);
     Route::get('/documents/pending', [DocumentController::class, 'pending'])->name('documents.pending');
     Route::post('/documents/{id}/approve', [DocumentController::class, 'approveSingle'])->name('documents.approve.single');
@@ -44,11 +51,11 @@ Route::middleware('auth')->group(function () {
     // Agregar esta ruta para el endpoint de eventos disponibles
     Route::get('/api/athletes/{athlete}/available-events', [PaymentController::class, 'getAvailableEvents']);
     Route::get('/athlete/{id}/print-constancy', [AthleteController::class, 'printConstancy'])
-    ->name('athlete.print-constancy');
+        ->name('athlete.print-constancy');
 
     Route::patch('/athletes/{id}/toggle-status', [AthleteController::class, 'toggleStatus'])->name('athlete.toggle-status');
 
-
+    Route::get('/payments/{id}/receipt', [PaymentController::class, 'generateReceipt'])->name('payments.receipt');
 });
 
 Route::resource('/roles', RoleController::class)->middleware('auth');
