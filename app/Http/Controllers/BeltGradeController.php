@@ -139,6 +139,24 @@ class BeltGradeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            DB::beginTransaction();
+
+            $belt = BeltGrade::findOrFail($id);
+
+            $belt->delete();
+
+            DB::commit();
+
+            return redirect()->route('belts.index')
+                ->with('success', 'Cinturon eliminada exitosamente.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Error al eliminar Cinturon: ". $e->getMessage());
+
+            return redirect()->back()
+                ->with('success', 'Error al eliminar la Cinturon.');
+        }
     }
 }

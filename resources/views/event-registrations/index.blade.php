@@ -45,7 +45,7 @@
                     @forelse($activeEvents as $event)
                         <tr>
                             <td>{{ $event->name }}</td>
-                            <td>{{ str_replace('_', ' ', $event->type) }}</td>
+                            <td>{{ str_replace('_', ' ', $event->type == 'Promotion Test' ? 'Examen de Promocion' : 'Competicion') }}</td>
                             <td>{{ $event->registration_deadline->format('d/m/Y') }}</td>
                             <td>
                                 <a href="{{ route('eventregistration.createEvent', $event) }}" class="btn btn-primary btn-sm">
@@ -84,8 +84,8 @@
                             <td>{{ $registration->athlete->full_name }}</td>
                             <td>{{ $registration->event->name }}</td>
                             <td>{{ $registration->category->name }}</td>
-                            <td>{{ $registration->status }}</td>
-                            <td>{{ $registration->payment_status }}</td>
+                            <td>{{ $registration->status === 'Registered' ? 'Registrado' : 'No Registrado' }}</td>
+                            <td>{{ $registration->payment_status === 'Completed' ? 'Completado' : 'Pendiente' }}</td>
                         </tr>
                     @empty
                         <tr>

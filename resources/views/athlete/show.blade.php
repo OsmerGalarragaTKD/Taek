@@ -263,7 +263,7 @@
                                 </div>
                             </div>
 
-                            <!-- Representantes (Nuevo Tab) -->
+                            <!-- Representantes -->
                             @if($isMinor)
                             <div class="tab-pane fade" id="representatives">
                                 <div class="row">
@@ -419,9 +419,29 @@
                     <h5 class="modal-title">Editar Información</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('athlete.update', $athlete->id) }}" method="POST">
+                <form action="{{ route('athlete.update', $athlete->id) }}" method="POST" class="needs-validation" novalidate>
                     @csrf
                     @method('PUT')
+                    
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                                <h5 class="mb-0">Errores en el formulario:</h5>
+                            </div>
+                            <hr>
+                            <ul class="list-unstyled mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>
+                                        <i class="bi bi-dot me-2"></i>
+                                        {{ $error }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
                     <div class="modal-body">
                         <div class="row g-3">
                             <!-- Información Personal -->
@@ -429,66 +449,119 @@
                                 <h6 class="border-bottom pb-2">Información Personal</h6>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Nombre Completo</label>
-                                <input type="text" class="form-control" name="full_name"
-                                    value="{{ $athlete->full_name }}">
+                                <label class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control @error('full_name') is-invalid @enderror" 
+                                       name="full_name"
+                                       id="full_name"
+                                       value="{{ old('full_name', $athlete->full_name) }}"
+                                       required
+                                       pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                                       title="Solo letras y espacios">
+                                @error('full_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Documento de Identidad</label>
-                                <input type="text" class="form-control" name="identity_document"
-                                    value="{{ $athlete->identity_document }}">
+                                <input type="text" 
+                                       class="form-control @error('identity_document') is-invalid @enderror" 
+                                       name="identity_document"
+                                       id="identity_document"
+                                       value="{{ old('identity_document', $athlete->identity_document) }}"
+                                       pattern="^[VEJ]-?\d{6,8}$"
+                                       title="Formato válido: V-12345678">
+                                @error('identity_document')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nacionalidad</label>
-                                <select class="form-control @error('nationality') is-invalid @enderror" id="nationality"
-                                    name="nationality">
-                                    <option value="Venezolano" {{ old('nationality') == 'Venezolano' ? 'selected' : '' }}>
-                                        Venezolano</option>
-                                    <option value="Extranjero" {{ old('nationality') == 'Extranjero' ? 'selected' : '' }}>
-                                        Extranjero</option>
+                                <select class="form-select @error('nationality') is-invalid @enderror" 
+                                        name="nationality"
+                                        id="nationality">
+                                    <option value="">Seleccionar</option>
+                                    <option value="Venezolano" {{ old('nationality', $athlete->nationality) == 'Venezolano' ? 'selected' : '' }}>
+                                        Venezolano
+                                    </option>
+                                    <option value="Extranjero" {{ old('nationality', $athlete->nationality) == 'Extranjero' ? 'selected' : '' }}>
+                                        Extranjero
+                                    </option>
                                 </select>
                                 @error('nationality')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Fecha de Nacimiento</label>
-                                <input type="date" class="form-control" name="birth_date" max="{{ date('Y-m-d', strtotime('-3 years')) }}"
-                                    value="{{ $athlete->birth_date?->format('Y-m-d') }}">
+                                <label class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                                <input type="date" 
+                                       class="form-control @error('birth_date') is-invalid @enderror" 
+                                       name="birth_date"
+                                       id="birth_date"
+                                       value="{{ old('birth_date', $athlete->birth_date?->format('Y-m-d')) }}"
+                                       max="{{ date('Y-m-d', strtotime('-3 years')) }}"
+                                       required>
+                                @error('birth_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Lugar de Nacimiento</label>
-                                <input type="text" class="form-control" name="birth_place"
-                                    value="{{ $athlete->birth_place }}">
+                                <input type="text" 
+                                       class="form-control @error('birth_place') is-invalid @enderror" 
+                                       name="birth_place"
+                                       value="{{ old('birth_place', $athlete->birth_place) }}">
+                                @error('birth_place')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Género</label>
-                                <select class="form-select" name="gender">
-                                    <option value="M" {{ $athlete->gender == 'M' ? 'selected' : '' }}>Masculino
+                                <label class="form-label">Género <span class="text-danger">*</span></label>
+                                <select class="form-select @error('gender') is-invalid @enderror" 
+                                        name="gender"
+                                        required>
+                                    <option value="M" {{ old('gender', $athlete->gender) == 'M' ? 'selected' : '' }}>
+                                        Masculino
                                     </option>
-                                    <option value="F" {{ $athlete->gender == 'F' ? 'selected' : '' }}>Femenino
+                                    <option value="F" {{ old('gender', $athlete->gender) == 'F' ? 'selected' : '' }}>
+                                        Femenino
                                     </option>
                                 </select>
+                                @error('gender')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Estado Civil</label>
-                                <select class="form-select" name="civil_status">
+                                <select class="form-select @error('civil_status') is-invalid @enderror" 
+                                        name="civil_status">
                                     <option value="">Seleccionar</option>
-                                    <option value="Soltero" {{ $athlete->civil_status == 'Soltero' ? 'selected' : '' }}>
-                                        Soltero</option>
-                                    <option value="Casado" {{ $athlete->civil_status == 'Casado' ? 'selected' : '' }}>
-                                        Casado</option>
-                                    <option value="Divorciado"
-                                        {{ $athlete->civil_status == 'Divorciado' ? 'selected' : '' }}>Divorciado</option>
-                                    <option value="Viudo" {{ $athlete->civil_status == 'Viudo' ? 'selected' : '' }}>Viudo
+                                    <option value="Soltero" {{ old('civil_status', $athlete->civil_status) == 'Soltero' ? 'selected' : '' }}>
+                                        Soltero
+                                    </option>
+                                    <option value="Casado" {{ old('civil_status', $athlete->civil_status) == 'Casado' ? 'selected' : '' }}>
+                                        Casado
+                                    </option>
+                                    <option value="Divorciado" {{ old('civil_status', $athlete->civil_status) == 'Divorciado' ? 'selected' : '' }}>
+                                        Divorciado
+                                    </option>
+                                    <option value="Viudo" {{ old('civil_status', $athlete->civil_status) == 'Viudo' ? 'selected' : '' }}>
+                                        Viudo
                                     </option>
                                 </select>
+                                @error('civil_status')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Profesión</label>
-                                <input type="text" class="form-control" name="profession"
-                                    value="{{ $athlete->profession }}">
+                                <input type="text" 
+                                       class="form-control @error('profession') is-invalid @enderror" 
+                                       name="profession"
+                                       value="{{ old('profession', $athlete->profession) }}">
+                                @error('profession')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Información Académica -->
@@ -497,26 +570,39 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nivel Académico</label>
-                                <select class="form-select" name="academic_level">
+                                <select class="form-select @error('academic_level') is-invalid @enderror" 
+                                        name="academic_level">
+                                    <option ```blade
                                     <option value="">Seleccionar</option>
-                                    <option value="Primaria"
-                                        {{ $athlete->academic_level == 'Primaria' ? 'selected' : '' }}>Primaria</option>
-                                    <option value="Secundaria"
-                                        {{ $athlete->academic_level == 'Secundaria' ? 'selected' : '' }}>Secundaria
+                                    <option value="Primaria" {{ old('academic_level', $athlete->academic_level) == 'Primaria' ? 'selected' : '' }}>
+                                        Primaria
                                     </option>
-                                    <option value="Técnico" {{ $athlete->academic_level == 'Técnico' ? 'selected' : '' }}>
-                                        Técnico</option>
-                                    <option value="Universitario"
-                                        {{ $athlete->academic_level == 'Universitario' ? 'selected' : '' }}>Universitario
+                                    <option value="Secundaria" {{ old('academic_level', $athlete->academic_level) == 'Secundaria' ? 'selected' : '' }}>
+                                        Secundaria
                                     </option>
-                                    <option value="Postgrado"
-                                        {{ $athlete->academic_level == 'Postgrado' ? 'selected' : '' }}>Postgrado</option>
+                                    <option value="Técnico" {{ old('academic_level', $athlete->academic_level) == 'Técnico' ? 'selected' : '' }}>
+                                        Técnico
+                                    </option>
+                                    <option value="Universitario" {{ old('academic_level', $athlete->academic_level) == 'Universitario' ? 'selected' : '' }}>
+                                        Universitario
+                                    </option>
+                                    <option value="Postgrado" {{ old('academic_level', $athlete->academic_level) == 'Postgrado' ? 'selected' : '' }}>
+                                        Postgrado
+                                    </option>
                                 </select>
+                                @error('academic_level')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Institución</label>
-                                <input type="text" class="form-control" name="institution"
-                                    value="{{ $athlete->institution }}">
+                                <input type="text" 
+                                       class="form-control @error('institution') is-invalid @enderror" 
+                                       name="institution"
+                                       value="{{ old('institution', $athlete->institution) }}">
+                                @error('institution')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Información de Contacto -->
@@ -525,18 +611,45 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email"
-                                    value="{{ $athlete->email }}">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" 
+                                           class="form-control @error('email') is-invalid @enderror" 
+                                           name="email"
+                                           id="email"
+                                           value="{{ old('email', $athlete->email) }}"
+                                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                                           placeholder="ejemplo@dominio.com">
+                                    @error('email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Teléfono</label>
-                                <input type="text" class="form-control" name="phone"
-                                    value="{{ $athlete->phone }}">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="text" 
+                                           class="form-control @error('phone') is-invalid @enderror" 
+                                           name="phone"
+                                           id="phone"
+                                           value="{{ old('phone', $athlete->phone) }}"
+                                           pattern="[0-9+\-()\s]{8,15}"
+                                           title="Formato válido: +58 412-1234567">
+                                    @error('phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Redes Sociales</label>
-                                <input type="text" class="form-control" name="social_media"
-                                    value="{{ $athlete->social_media }}">
+                                <input type="text" 
+                                       class="form-control @error('social_media') is-invalid @enderror" 
+                                       name="social_media"
+                                       value="{{ old('social_media', $athlete->social_media) }}">
+                                @error('social_media')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Dirección -->
@@ -545,18 +658,33 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Estado</label>
-                                <input type="text" class="form-control" name="address_state"
-                                    value="{{ $athlete->address_state }}">
+                                <input type="text" 
+                                       class="form-control @error('address_state') is-invalid @enderror" 
+                                       name="address_state"
+                                       value="{{ old('address_state', $athlete->address_state) }}">
+                                @error('address_state')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Ciudad</label>
-                                <input type="text" class="form-control" name="address_city"
-                                    value="{{ $athlete->address_city }}">
+                                <input type="text" 
+                                       class="form-control @error('address_city') is-invalid @enderror" 
+                                       name="address_city"
+                                       value="{{ old('address_city', $athlete->address_city) }}">
+                                @error('address_city')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Dirección Detallada</label>
-                                <input type="text" class="form-control" name="address_details"
-                                    value="{{ $athlete->address_details }}">
+                                <input type="text" 
+                                       class="form-control @error('address_details') is-invalid @enderror" 
+                                       name="address_details"
+                                       value="{{ old('address_details', $athlete->address_details) }}">
+                                @error('address_details')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Documentos -->
@@ -565,13 +693,26 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Número de Pasaporte</label>
-                                <input type="text" class="form-control" name="passport_number"
-                                    value="{{ $athlete->passport_number }}">
+                                <input type="text" 
+                                       class="form-control @error('passport_number') is-invalid @enderror" 
+                                       name="passport_number"
+                                       value="{{ old('passport_number', $athlete->passport_number) }}"
+                                       pattern="[A-Z0-9]{6,9}"
+                                       title="Formato válido: Letras mayúsculas y números">
+                                @error('passport_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Fecha de Vencimiento del Pasaporte</label>
-                                <input type="date" class="form-control" name="passport_expiry"
-                                    value="{{ $athlete->passport_expiry }}">
+                                <input type="date" 
+                                       class="form-control @error('passport_expiry') is-invalid @enderror" 
+                                       name="passport_expiry"
+                                       value="{{ old('passport_expiry', $athlete->passport_expiry) }}"
+                                       min="{{ date('Y-m-d') }}">
+                                @error('passport_expiry')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Información Física -->
@@ -580,49 +721,89 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Altura (cm)</label>
-                                <input type="number" step="0.01" class="form-control" name="height"
-                                    value="{{ $athlete->height }}">
+                                <input type="number" 
+                                       step="0.01" 
+                                       class="form-control @error('height') is-invalid @enderror" 
+                                       name="height"
+                                       id="height"
+                                       value="{{ old('height', $athlete->height) }}"
+                                       min="50"
+                                       max="300">
+                                @error('height')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Peso Actual (kg)</label>
-                                <input type="number" step="0.01" class="form-control" name="current_weight"
-                                    value="{{ $athlete->current_weight }}">
+                                <input type="number" 
+                                       step="0.01" 
+                                       class="form-control @error('current_weight') is-invalid @enderror" 
+                                       name="current_weight"
+                                       id="current_weight"
+                                       value="{{ old('current_weight', $athlete->current_weight) }}"
+                                       min="10"
+                                       max="500">
+                                @error('current_weight')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Talla de Camisa</label>
-                                <select class="form-select" name="shirt_size">
+                                <select class="form-select @error('shirt_size') is-invalid @enderror" 
+                                        name="shirt_size">
                                     <option value="">Seleccionar</option>
-                                    <option value="XS" {{ $athlete->shirt_size == 'XS' ? 'selected' : '' }}>XS
-                                    </option>
-                                    <option value="S" {{ $athlete->shirt_size == 'S' ? 'selected' : '' }}>S
-                                    </option>
-                                    <option value="M" {{ $athlete->shirt_size == 'M' ? 'selected' : '' }}>M
-                                    </option>
-                                    <option value="L" {{ $athlete->shirt_size == 'L' ? 'selected' : '' }}>L
-                                    </option>
-                                    <option value="XL" {{ $athlete->shirt_size == 'XL' ? 'selected' : '' }}>XL
-                                    </option>
-                                    <option value="XXL" {{ $athlete->shirt_size == 'XXL' ? 'selected' : '' }}>
-                                        XXL</option>
+                                    <option value="XS" {{ old('shirt_size', $athlete->shirt_size) == 'XS' ? 'selected' : '' }}>XS</option>
+                                    <option value="S" {{ old('shirt_size', $athlete->shirt_size) == 'S' ? 'selected' : '' }}>S</option>
+                                    <option value="M" {{ old('shirt_size', $athlete->shirt_size) == 'M' ? 'selected' : '' }}>M</option>
+                                    <option value="L" {{ old('shirt_size', $athlete->shirt_size) == 'L' ? 'selected' : '' }}>L</option>
+                                    <option value="XL" {{ old('shirt_size', $athlete->shirt_size) == 'XL' ? 'selected' : '' }}>XL</option>
+                                    <option value="XXL" {{ old('shirt_size', $athlete->shirt_size) == 'XXL' ? 'selected' : '' }}>XXL</option>
                                 </select>
+                                @error('shirt_size')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Talla de Pantalón</label>
-                                <input type="text" class="form-control" name="pants_size"
-                                    value="{{ $athlete->pants_size }}">
+                                <input type="text" 
+                                       class="form-control @error('pants_size') is-invalid @enderror" 
+                                       name="pants_size"
+                                       id="pants_size"
+                                       value="{{ old('pants_size', $athlete->pants_size) }}"
+                                       maxlength="10">
+                                @error('pants_size')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Talla de Calzado</label>
-                                <input type="text" class="form-control" name="shoe_size"
-                                    value="{{ $athlete->shoe_size }}">
+                                <input type="text" 
+                                       class="form-control @error('shoe_size') is-invalid @enderror" 
+                                       name="shoe_size"
+                                       id="shoe_size"
+                                       value="{{ old('shoe_size', $athlete->shoe_size) }}"
+                                       maxlength="10">
+                                @error('shoe_size')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Condiciones Médicas</label>
-                                <textarea class="form-control" name="medical_conditions" rows="3">{{ $athlete->medical_conditions }}</textarea>
+                                <textarea class="form-control @error('medical_conditions') is-invalid @enderror" 
+                                          name="medical_conditions" 
+                                          rows="3">{{ old('medical_conditions', $athlete->medical_conditions) }}</textarea>
+                                @error('medical_conditions')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Alergias</label>
-                                <textarea class="form-control" name="allergies" rows="3">{{ $athlete->allergies }}</textarea>
+                                <textarea class="form-control @error('allergies') is-invalid @enderror" 
+                                          name="allergies" 
+                                          rows="3">{{ old('allergies', $athlete->allergies) }}</textarea>
+                                @error('allergies')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Información de Artes Marciales -->
@@ -630,12 +811,14 @@
                                 <h6 class="border-bottom pb-2 mt-2">Información de Artes Marciales</h6>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Cinturón *</label>
-                                <select class="form-select @error('belt_grade_id') is-invalid @enderror" name="belt_grade_id" required>
+                                <label class="form-label">Cinturón <span class="text-danger">*</span></label>
+                                <select class="form-select @error('belt_grade_id') is-invalid @enderror" 
+                                        name="belt_grade_id" 
+                                        required>
                                     <option value="">Seleccionar</option>
                                     @foreach ($beltGrades as $grade)
                                         <option value="{{ $grade->id }}"
-                                            {{ $athlete->currentGrade && $athlete->currentGrade->grade_id == $grade->id ? 'selected' : '' }}>
+                                            {{ old('belt_grade_id', $athlete->currentGrade?->grade_id) == $grade->id ? 'selected' : '' }}>
                                             {{ $grade->name . ' - ' . $grade->color . ' - ' . $grade->level }}
                                         </option>
                                     @endforeach
@@ -645,12 +828,14 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Sede</label>
-                                <select class="form-select @error('venue_id') is-invalid @enderror" name="venue_id" required>
+                                <label class="form-label">Sede <span class="text-danger">*</span></label>
+                                <select class="form-select @error('venue_id') is-invalid @enderror" 
+                                        name="venue_id" 
+                                        required>
                                     <option value="">Seleccionar sede</option>
                                     @foreach($venues as $venue)
                                         <option value="{{ $venue->id }}" 
-                                            {{ $athlete->venue_id == $venue->id ? 'selected' : '' }}>
+                                            {{ old('venue_id', $athlete->venue_id) == $venue->id ? 'selected' : '' }}>
                                             {{ $venue->name }} - {{ $venue->address_city }}
                                         </option>
                                     @endforeach
@@ -660,85 +845,150 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Fecha de Obtención *</label>
-                                <input type="date" class="form-control @error('grade_date_achieved') is-invalid @enderror" 
-                                       name="grade_date_achieved" required
-                                       value="{{ $athlete->currentGrade ? $athlete->currentGrade->date_achieved?->format('Y-m-d') : '' }}">
+                                <label class="form-label">Fecha de Obtención <span class="text-danger">*</span></label>
+                                <input type="date" 
+                                       class="form-control @error('grade_date_achieved') is-invalid @enderror" 
+                                       name="grade_date_achieved" 
+                                       required
+                                       value="{{ old('grade_date_achieved', $athlete->currentGrade?->date_achieved?->format('Y-m-d')) }}"
+                                       max="{{ date('Y-m-d') }}">
                                 @error('grade_date_achieved')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Número de Certificado *</label>
-                                <input type="text" class="form-control @error('grade_certificate_number') is-invalid @enderror" 
-                                       name="grade_certificate_number" required
-                                       value="{{ $athlete->currentGrade ? $athlete->currentGrade->certificate_number : '' }}">
+                                <label class="form-label">Número de Certificado <span class="text-danger"></span></label>
+                                <input type="text" 
+                                       class="form-control @error('grade_certificate_number') is-invalid @enderror" 
+                                       name="grade_certificate_number" 
+                                       value="{{ old('grade_certificate_number', $athlete->currentGrade?->certificate_number) }}"
+                                       >
                                 @error('grade_certificate_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             @if ($athlete->birth_date && \Carbon\Carbon::parse($athlete->birth_date)->age < 18)
+                                <!-- Información del Representante -->
                                 <div class="col-12">
                                     <h6 class="border-bottom pb-2 mt-2">Información del Representante</h6>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Nombre del Representante</label>
-                                    <input type="text" class="form-control" name="representative_name"
-                                        value="{{ $athlete->primaryRepresentative ? $athlete->primaryRepresentative->representative->full_name : '' }}">
+                                    <label class="form-label">Nombre del Representante <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           class="form-control @error('representative_name') is-invalid @enderror" 
+                                           name="representative_name"
+                                           id="representative_name"
+                                           value="{{ old('representative_name', $athlete->primaryRepresentative?->representative->full_name) }}"
+                                           pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                                           title="Solo letras y espacios"
+                                           required>
+                                    @error('representative_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Documento de Identidad</label>
-                                    <input type="text" class="form-control" name="representative_identity_document"
-                                        value="{{ $athlete->primaryRepresentative ? $athlete->primaryRepresentative->representative->identity_document : '' }}">
+                                    <label class="form-label">Documento de Identidad <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           class="form-control @error('representative_identity_document') is-invalid @enderror" 
+                                           name="representative_identity_document"
+                                           id="representative_identity_document"
+                                           value="{{ old('representative_identity_document', $athlete->primaryRepresentative?->representative->identity_document) }}"
+                                           pattern="^[VEJ]-?\d{6,8}$"
+                                           title="Formato válido: V-12345678"
+                                           required>
+                                    @error('representative_identity_document')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Relación</label>
-                                    <select class="form-select" name="representative_relationship">
+                                    <label class="form-label">Relación <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('representative_relationship') is-invalid @enderror" 
+                                            name="representative_relationship"
+                                            required>
                                         <option value="">Seleccionar</option>
                                         <option value="Padre"
-                                            {{ $athlete->primaryRepresentative && $athlete->primaryRepresentative->relationship == 'Padre' ? 'selected' : '' }}>
-                                            Padre</option>
+                                            {{ old('representative_relationship', $athlete->primaryRepresentative?->relationship) == 'Padre' ? 'selected' : '' }}>
+                                            Padre
+                                        </option>
                                         <option value="Madre"
-                                            {{ $athlete->primaryRepresentative && $athlete->primaryRepresentative->relationship == 'Madre' ? 'selected' : '' }}>
-                                            Madre</option>
+                                            {{ old('representative_relationship', $athlete->primaryRepresentative?->relationship) == 'Madre' ? 'selected' : '' }}>
+                                            Madre
+                                        </option>
                                         <option value="Tutor"
-                                            {{ $athlete->primaryRepresentative && $athlete->primaryRepresentative->relationship == 'Tutor' ? 'selected' : '' }}>
-                                            Tutor Legal</option>
+                                            {{ old('representative_relationship', $athlete->primaryRepresentative?->relationship) == 'Tutor' ? 'selected' : '' }}>
+                                            Tutor Legal
+                                        </option>
                                     </select>
+                                    @error('representative_relationship')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Email del Representante</label>
-                                    <input type="text" class="form-control" name="representative_email"
-                                        value="{{ $athlete->primaryRepresentative ? $athlete->primaryRepresentative->representative->email : '' }}">
+                                    <input type="email" 
+                                           class="form-control @error('representative_email') is-invalid @enderror" 
+                                           name="representative_email"
+                                           value="{{ old('representative_email', $athlete->primaryRepresentative?->representative->email) }}"
+                                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+                                    @error('representative_email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Teléfono del Representante</label>
-                                    <input type="text" class="form-control" name="representative_phone"
-                                        value="{{ $athlete->primaryRepresentative ? $athlete->primaryRepresentative->representative->phone : '' }}">
+                                    <label class="form-label">Teléfono del Representante <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           class="form-control @error('representative_phone') is-invalid @enderror" 
+                                           name="representative_phone"
+                                           id="representative_phone"
+                                           value="{{ old('representative_phone', $athlete->primaryRepresentative?->representative->phone) }}"
+                                           pattern="[0-9+\-()\s]{8,15}"
+                                           title="Formato válido: +58 412-1234567"
+                                           required>
+                                    @error('representative_phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="representative_nationality" class="form-label">Nacionalidad</label>
-                                    <select class="form-select" name="representative_nationality">
-                                        <option value="Venezolano">
-                                            {{ $athlete->primaryRepresentative && $athlete->primaryRepresentative->representative->nationality == 'Venezolano' ? 'selected' : ''}}
+                                    <label class="form-label">Nacionalidad <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('representative_nationality') is-invalid @enderror" 
+                                            name="representative_nationality"
+                                            required>
+                                        <option value="">Seleccionar</option>
+                                        <option value="Venezolano"
+                                            {{ old('representative_nationality', $athlete->primaryRepresentative?->representative->nationality) == 'Venezolano' ? 'selected' : '' }}>
                                             Venezolano
                                         </option>
-                                        <option value="Extranjero">
-                                            {{ $athlete->primaryRepresentative && $athlete->primaryRepresentative->representative->nationality == 'Extranjero' ? 'selected' : ''}}
+                                        <option value="Extranjero"
+                                            {{ old('representative_nationality', $athlete->primaryRepresentative?->representative->nationality) == 'Extranjero' ? 'selected' : '' }}>
                                             Extranjero
                                         </option>
                                     </select>
+                                    @error('representative_nationality')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Fecha de Cumpleaños del Representante</label>
-                                    <input type="date" class="form-control" name="representative_birth_date"
-                                        value="{{ $athlete->primaryRepresentative ? $athlete->primaryRepresentative->representative->birth_date->format('Y-m-d') : '' }}">
+                                    <label class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                                    <input type="date" 
+                                           class="form-control @error('representative_birth_date') is-invalid @enderror" 
+                                           name="representative_birth_date"
+                                           value="{{ old('representative_birth_date', $athlete->primaryRepresentative?->representative->birth_date?->format('Y-m-d')) }}"
+                                           max="{{ date('Y-m-d') }}"
+                                           required>
+                                    @error('representative_birth_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Profesión del Representante</label>
-                                    <input type="text" class="form-control" name="representative_profession"
-                                        value="{{ $athlete->primaryRepresentative ? $athlete->primaryRepresentative->representative->profession : '' }}">
+                                    <label class="form-label">Profesión</label>
+                                    <input type="text" 
+                                           class="form-control @error('representative_profession') is-invalid @enderror" 
+                                           name="representative_profession"
+                                           value="{{ old('representative_profession', $athlete->primaryRepresentative?->representative->profession) }}">
+                                    @error('representative_profession')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             @endif
                         </div>
@@ -751,48 +1001,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal para Nuevo Grado -->
-    <div class="modal fade" id="gradeModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrar Nuevo Grado</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('athlete.update', $athlete->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Grado/Cinturón</label>
-                            <select class="form-select" name="belt_grade_id" required>
-                                <option value="">Seleccionar grado</option>
-                                @foreach ($beltGrades as $grade)
-                                    <option value="{{ $grade->id }}">
-                                        {{ $grade->name . ' - ' . $grade->color . ' - ' . $grade->level }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha de Obtención</label>
-                            <input type="date" class="form-control" name="grade_date_achieved">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Número de Certificado</label>
-                            <input type="text" class="form-control" name="grade_certificate_number" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 @endsection
-
 
 @section('css')
     {{-- Bootstrap Icons --}}
@@ -899,7 +1108,6 @@
         .modal-dialog-scrollable .modal-body {
             overflow-y: auto;
             max-height: calc(100vh - 210px);
-            /* Ajusta según el tamaño del header y footer */
         }
 
         .timeline {
@@ -936,60 +1144,119 @@
         .timeline-content {
             padding: 0.5rem 0;
         }
+
+        /* Estilos para validación */
+        .was-validated .form-control:invalid,
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .was-validated .form-control:valid,
+        .form-control.is-valid {
+            border-color: #198754;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+
+        .was-validated :invalid ~ .invalid-feedback,
+        .is-invalid ~ .invalid-feedback {
+            display: block;
+        }
     </style>
 @stop
 
 
 @section('js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Código existente...
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Modal
-            const editModal = new bootstrap.Modal(document.getElementById('editModal'), {
-                keyboard: false
-            });
-
-            // Manejador para el botón de editar
-            document.querySelector('[data-bs-toggle="modal"]').addEventListener('click', function() {
-                editModal.show();
-            });
-
-            // Inicializar Tabs
-            const triggerTabList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tab"]'));
-            triggerTabList.forEach(function(triggerEl) {
-                const tabTrigger = new bootstrap.Tab(triggerEl);
-
-                triggerEl.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    tabTrigger.show();
-                });
-            });
-
-            // Mantener tab activo después de recargar
-            const hash = window.location.hash;
-            if (hash) {
-                const triggerEl = document.querySelector(`[data-bs-toggle="tab"][href="${hash}"]`);
-                if (triggerEl) {
-                    bootstrap.Tab.getInstance(triggerEl).show();
+        // Validación del formulario
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
                 }
+                form.classList.add('was-validated')
+            }, false)
+        })
+
+        // Validación en tiempo real
+        const validations = {
+            full_name: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/,
+            identity_document: /^[VEJ]-?\d{6,8}$/i,
+            phone: /^[0-9+\-()\s]*$/,
+            emergency_contact_name: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/,
+            emergency_contact_phone: /^[0-9+\-()\s]*$/,
+            emergency_contact_relation: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/,
+            representative_name: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/,
+            representative_identity_document: /^[VEJ]-?\d{6,8}$/i,
+            representative_phone: /^[0-9+\-()\s]*$/
+        }
+
+        Object.keys(validations).forEach(fieldId => {
+            const field = document.getElementById(fieldId)
+            if (field) {
+                field.addEventListener('input', function() {
+                    this.value = this.value.replace(new RegExp(`[^${validations[fieldId].source}]`, 'g'), '')
+                })
             }
+        })
 
-            // Actualizar URL al cambiar de tab
-            triggerTabList.forEach(function(triggerEl) {
-                triggerEl.addEventListener('shown.bs.tab', function(event) {
-                    window.location.hash = event.target.getAttribute('href');
-                });
-            });
+        // Validación de fecha de nacimiento
+        const birthDateInput = document.getElementById('birth_date')
+        if (birthDateInput) {
+            birthDateInput.addEventListener('change', function() {
+                const minDate = new Date()
+                minDate.setFullYear(minDate.getFullYear() - 3)
+                
+                if (new Date(this.value) > minDate) {
+                    this.setCustomValidity('El atleta debe tener al menos 3 años')
+                } else {
+                    this.setCustomValidity('')
+                }
+            })
+        }
 
-            // Auto-cerrar alertas
-            const alertList = document.querySelectorAll('.alert');
-            alertList.forEach(function(alert) {
-                setTimeout(function() {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }, 5000);
-            });
-        });
-    </script>
+        // Validación de campos numéricos
+        const numericValidations = {
+            height: { min: 50, max: 300 },
+            current_weight: { min: 10, max: 500 }
+        }
+
+        Object.entries(numericValidations).forEach(([fieldId, { min, max }]) => {
+            const field = document.getElementById(fieldId)
+            if (field) {
+                field.addEventListener('input', function() {
+                    const value = parseFloat(this.value)
+                    if (value < min || value > max) {
+                        this.setCustomValidity(`El valor debe estar entre ${min} y ${max}`)
+                    } else {
+                        this.setCustomValidity('')
+                    }
+                })
+            }
+        })
+    })
+</script>
 @stop
+
 

@@ -80,7 +80,16 @@
                                         <td>{{ $category->min_weight.'Kg. '.' - '.$category->max_weight.'Kg. ' ?? 'No registrado' }}</td>
                                         <td>{{ $category->gender ?? 'No registrado' }}</td>
                                         <td class="text-center">
-                                            <span class="badge bg-success">Activo</span>
+                                            <form action="{{ route('categories.toggle-status', $category->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="btn btn-sm {{ $category->status === 'Active' ? 'btn-success' : ($category->status === 'Inactive' ? 'btn-danger' : 'btn-warning') }}"
+                                                    title="Click para cambiar estado">
+                                                    {{ $category->status === 'Active' ? 'Activa' : 'Inactiva' }}
+                                                </button>
+                                            </form>
                                         </td>
                                         <td class="text-center">
                                             <a href="{{ route('categories.show', $category->id) }}" class="btn btn-sm btn-info me-2">

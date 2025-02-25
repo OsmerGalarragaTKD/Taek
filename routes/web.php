@@ -54,6 +54,8 @@ Route::middleware('auth')->group(function () {
         ->name('athlete.print-constancy');
 
     Route::patch('/athletes/{id}/toggle-status', [AthleteController::class, 'toggleStatus'])->name('athlete.toggle-status');
+    Route::patch('/categories/{id}/toggle-status', [AthleteController::class, 'toggleStatus'])->name('categories.toggle-status');
+
 
     Route::get('/payments/{id}/receipt', [PaymentController::class, 'generateReceipt'])->name('payments.receipt');
 });

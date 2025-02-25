@@ -147,6 +147,33 @@ class CategoryController extends Controller
         }
     }
 
+    public function toggleStatus(string $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $category = Category::findOrFail($id);
+
+            // Lógica mejorada para rotar entre estados
+            $newStatus = match ($category->status) {
+                'Active' => 'Inactive',
+                'Inactive' => 'Active',
+                default => 'Active' // Para otros estados no contemplados
+            };
+
+            $category->update(['status' => $newStatus]);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', "Estado actualizado a {$newStatus} correctamente");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error cambiando estado: ' . $e->getMessage());
+            return back()->with('error', 'Error al actualizar el estado');
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */

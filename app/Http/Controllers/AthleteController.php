@@ -257,7 +257,7 @@ class AthleteController extends Controller
             'allergies' => 'nullable|string|max:1000',
             'belt_grade_id' => 'required|exists:belt_grades,id',
             'grade_date_achieved' => 'required|date|before_or_equal:today',
-            'grade_certificate_number' => 'required|string|max:50',
+            'grade_certificate_number' => 'nullable|string|max:50',
         ];
 
         // Reglas adicionales para representante si es menor de edad
