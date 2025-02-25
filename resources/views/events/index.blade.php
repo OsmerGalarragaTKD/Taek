@@ -61,11 +61,7 @@
                                            title="Ver detalles">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('events.edit', $event->id) }}" 
-                                           class="btn btn-sm btn-warning" 
-                                           title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+
                                         <button type="button" 
                                                 class="btn btn-sm btn-danger" 
                                                 onclick="confirmarEliminacion('{{ $event->id }}')"

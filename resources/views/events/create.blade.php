@@ -134,7 +134,7 @@
                                     <select name="categories[0][category_id]" class="form-control" required>
                                         <option value="">Seleccione una categoría</option>
                                         @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            <option value="{{ $category->id }}">{{ $category->name.' - '.$category->type }}</option>
                                         @endforeach
                                     </select>
                                     <input type="number" name="categories[0][registration_fee]" class="form-control mt-2"
@@ -177,7 +177,7 @@
                                     <select name="categories[${categoryIndex}][category_id]" class="form-control" required>
                                         <option value="">Seleccionar categoría...</option>
                                         @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            <option value="{{ $category->id }}">{{ $category->name.' - '.$category->color }}</option>
                                         @endforeach
                                     </select>
                                     <input type="number" name="categories[${categoryIndex}][registration_fee]" class="form-control mt-2" placeholder="Tarifa de registro" step="0.01">

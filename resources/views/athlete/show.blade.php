@@ -776,7 +776,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Fecha de Obtención</label>
-                            <input type="date" class="form-control" name="grade_date_achieved" required>
+                            <input type="date" class="form-control" name="grade_date_achieved">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Número de Certificado</label>
