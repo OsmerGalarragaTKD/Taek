@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('/roles', RoleController::class)->middleware('auth');
+
 Route::post('/roles/assign/{user}', [RoleController::class, 'assignRole'])->name('roles.assign')->middleware('auth');
 
 Route::resource('/athlete', AthleteController::class)->middleware('auth');

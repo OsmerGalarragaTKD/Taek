@@ -31,7 +31,7 @@ class RoleController extends Controller
             $groupedPermissions = $permissions->groupBy(function ($permission) {
                 return explode('_', $permission->name)[1];
             });
-            return view('roles.create', compact('permissions','groupedPermissions'));
+            return view('roles.create', compact('permissions', 'groupedPermissions'));
         } catch (\Exception $e) {
             Log::error('Error al cargar formulario de creación: ' . $e->getMessage());
             return redirect()->route('roles.index')->with('error', 'Error al cargar el formulario');
@@ -77,13 +77,23 @@ class RoleController extends Controller
     public function edit($id)
     {
         try {
+            // Buscar el rol por su ID
             $role = Role::with('permissions')->findOrFail($id);
+    
+            // Obtener todos los permisos y agruparlos por módulo
             $permissions = Permission::orderBy('name')->get();
             $groupedPermissions = $permissions->groupBy(function ($permission) {
-                return explode('_', $permission->name)[1];
+                // Dividir el nombre del permiso por '_'
+                $parts = explode('_', $permission->name);
+    
+                // Si no hay suficientes partes, usar 'otros' como grupo
+                return count($parts) > 1 ? $parts[1] : 'otros';
             });
+    
+            // Retornar la vista con los datos
             return view('roles.edit', compact('role', 'permissions', 'groupedPermissions'));
         } catch (\Exception $e) {
+            // Registrar el error y redirigir con un mensaje
             Log::error("Error al editar rol ID {$id}: " . $e->getMessage());
             return redirect()->route('roles.index')->with('error', 'Rol no encontrado');
         }

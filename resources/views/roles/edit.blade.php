@@ -56,7 +56,7 @@
                                                         <div class="form-check">
                                                             <input class="form-check-input permission-checkbox"
                                                                 type="checkbox" name="permissions[]"
-                                                                value="{{ $permission->id }}" {{-- Mantenemos el ID aquí --}}
+                                                                value="{{ $permission->id }}"
                                                                 id="permission_{{ $permission->id }}"
                                                                 data-module="{{ $module }}"
                                                                 {{ $role->hasPermissionTo($permission->name) ? 'checked' : '' }}>

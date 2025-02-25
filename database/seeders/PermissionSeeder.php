@@ -52,13 +52,18 @@ class PermissionSeeder extends Seeder
         ]);
 
         Permission::create([
-            'name' => 'athlete',
+            'name' => 'usuarios_pagos',
             'guard_name' => 'web'
         ]);
 
         // Crear rol de Super Admin
         $superAdmin = Role::create([
             'name' => 'Super Admin',
+            'guard_name' => 'web'
+        ]);
+
+        $athlete = Role::create([
+            'name' => 'athlete',
             'guard_name' => 'web'
         ]);
 

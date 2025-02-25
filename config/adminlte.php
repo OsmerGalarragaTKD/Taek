@@ -353,7 +353,7 @@ return [
             'text' => 'Pagos Usuarios',
             'url' => 'payments/user-payment',
             'icon' => 'fas fa-money-bill',
-            'can' => 'gestionar_pagos'
+            'can' => 'usuarios_pagos'
         ],
         [
             'text' => 'Usuarios y roles',
