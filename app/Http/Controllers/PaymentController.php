@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -103,7 +104,6 @@ class PaymentController extends Controller
 
             return redirect()->back()
                 ->with('success', 'Pago aprobado exitosamente');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -365,5 +365,88 @@ class PaymentController extends Controller
         $fileName = "recibo-" . ($payment->payment_type === 'Monthly_Fee' ? 'mensualidad' : 'evento') . "-{$payment->id}.pdf";
 
         return $pdf->download($fileName);
+    }
+
+    public function userPayment()
+    {
+        return view('payments.user-payment');
+    }
+
+    public function userStore(Request $request)
+    {
+        // Validación de los datos del formulario (sin athlete_id)
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric|min:0',
+            'payment_date' => 'required|date',
+            'payment_type' => 'required|in:Monthly_Fee,Event_Registration,Equipment,Other',
+            'payment_method' => 'required|in:Transfer,Card',
+            'reference_number' => 'required|string|max:255',
+            'receipt_url' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Tamaño máximo de 2MB
+            'notes' => 'nullable|string',
+        ]);
+
+        // Si la validación falla, redirigir con errores
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Obtener el athlete_id del usuario autenticado
+            $athlete_id = Auth::user()->id;
+            $athlete_id -= 1;
+
+            // Procesar la subida del archivo (comprobante de pago)
+            $receipt_path = null;
+            if ($request->hasFile('receipt_url')) {
+                $file = $request->file('receipt_url');
+                $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+
+                // Guardar el archivo en el directorio storage/app/public/receipts
+                $storage_path = storage_path('app/public/receipts');
+                if (!file_exists($storage_path)) {
+                    mkdir($storage_path, 0755, true); // Crear el directorio si no existe
+                }
+
+                // Mover el archivo al directorio
+                $file->move($storage_path, $filename);
+                $receipt_path = 'receipts/' . $filename;
+
+                // Verificar que el archivo se movió correctamente
+                if (!file_exists($storage_path . '/' . $filename)) {
+                    throw new \Exception('Error al guardar el archivo');
+                }
+            }
+
+            // Crear el pago en la base de datos
+            Payment::create([
+                'athlete_id' => $athlete_id, // Usar el athlete_id del usuario autenticado
+                'amount' => $request->amount,
+                'payment_date' => $request->payment_date,
+                'payment_type' => $request->payment_type,
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'receipt_url' => $receipt_path,
+                'notes' => $request->notes,
+                'status' => 'Pending', // Los pagos de usuarios comienzan como pendientes
+            ]);
+
+            DB::commit();
+
+            // Redirigir con mensaje de éxito
+            return redirect()->route('home')
+                ->with('success', 'Pago registrado exitosamente. Será revisado por un administrador.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Error al registrar pago de usuario: " . $e->getMessage());
+
+            // Redirigir con mensaje de error
+            return redirect()->back()
+                ->with('error', 'Ocurrió un error al registrar el pago: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }
