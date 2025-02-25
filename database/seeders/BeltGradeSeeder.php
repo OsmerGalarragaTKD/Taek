@@ -18,26 +18,40 @@ class BeltGradeSeeder extends Seeder
         $this->createDanGrades();
     }
 
+
     private function createKupGrades()
     {
-        for ($i = 1; $i <= 10; $i++) {
-            BeltGrade::create([
-                'type' => 'KUP',
-                'level' => $i,
-                'name' => "Kup",
-                'color' => 'Cinturon de Color'
-            ]);
+        for ($i = 0; $i <= 10; $i++) {  
+            $kup = [  
+                'BLANCO',  
+                'PUNTA AMARILLA',  
+                'AMARILLO',  
+                'NARANJA',  
+                'VERDE',  
+                'CELESTE',  
+                'AZUL',  
+                'MARRÓN',  
+                'ROJO',  
+                'ROJO 1 PUNTA NEGRA',  
+                'ROJO 2 PUNTA NEGRA'  
+            ];  
+            BeltGrade::create([  
+                'type' => 'KUP',  
+                'level' => $i + 1,  
+                'name' => "Kup",  
+                'color' => $kup[$i]  
+            ]);  
         }
     }
 
     private function createPoomGrades()
     {
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 4; $i++) {
             BeltGrade::create([
                 'type' => 'POOM',
                 'level' => $i,
                 'name' => "Poom",
-                'color' => 'Cinturon de Bodan'
+                'color' => 'Cinturon de Bodan '.$i
             ]);
         }
     }
@@ -49,7 +63,7 @@ class BeltGradeSeeder extends Seeder
                 'type' => 'DAN',
                 'level' => $i,
                 'name' => "Dan",
-                'color' => 'Cinturon Negro'
+                'color' => 'Cinturon Negro '.$i
             ]);
         }
     }

@@ -77,20 +77,18 @@
                                             </td>
                                             <td>{{ $athlete->identity_document ?? 'No registrado' }}</td>
                                             <td>
-                                                @if($athlete->birth_date)
+                                                @if ($athlete->birth_date)
                                                     {{ $athlete->birth_date->age }} años
                                                 @else
                                                     N/A
                                                 @endif
                                             </td>
-                                            
+
                                             <!-- Nueva columna de Cinturón -->
                                             <td>
-                                                @if($athlete->currentGrade && $athlete->currentGrade->grade)
-                                                    <span class="badge-grade" 
-                                                          {{-- style="background-color: {{ $athlete->currentGrade->grade->color }};
-                                                                 color: {{ getContrastColor($athlete->currentGrade->grade->color) }}" --}}
-                                                    >
+                                                @if ($athlete->currentGrade && $athlete->currentGrade->grade)
+                                                    <span class="badge-grade" {{-- style="background-color: {{ $athlete->currentGrade->grade->color }};
+                                                                 color: {{ getContrastColor($athlete->currentGrade->grade->color) }}" --}}>
                                                         {{ $athlete->currentGrade->grade->name }}
                                                     </span>
                                                 @else
@@ -98,7 +96,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($athlete->venue_id)
+                                                @if ($athlete->venue_id)
                                                     {{ $athlete->venue->name }} años
                                                 @else
                                                     N/A
@@ -190,12 +188,50 @@
                 text-transform: uppercase;
             }
         </style>
+        <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css')}}">
+        <link rel="stylesheet" href="{{asset('css/buttons.bootstrap4.min.css')}}">
+        
     @endpush
 
     @push('js')
+        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
+        <script src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
+        <script src="{{ asset('js/buttons.bootstrap4.min.js') }}"></script>
+        <script src="{{ asset('js/jszip.min.js') }}"></script>
+        <script src="{{ asset('js/pdfmake.min.js') }}"></script>
+        <script src="{{ asset('js/vfs_fonts.js') }}"></script>
+        <script src="{{ asset('js/buttons.html5.min.js') }}"></script>
+        <script src="{{ asset('js/buttons.print.min.js') }}"></script>
         <script>
             $(document).ready(function() {
                 $('#athleteTable').DataTable({
+                    dom: 'Bfrtip',
+                    buttons: [{
+                            extend: 'excel',
+                            text: '<i class="fas fa-file-excel mr-1"></i> Excel',
+                            className: 'btn btn-success btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6]
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
+                            className: 'btn btn-danger btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6]
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: '<i class="fas fa-print mr-1"></i> Imprimir',
+                            className: 'btn btn-info btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6]
+                            }
+                        }
+                    ],
                     "language": {
                         "sProcessing": "Procesando...",
                         "sLengthMenu": "Mostrar _MENU_ registros",
@@ -234,6 +270,7 @@
                         "orderable": false // No permitir ordenar
                     }]
                 });
+                
 
                 // Auto-cerrar alertas después de 5 segundos
                 window.setTimeout(function() {
