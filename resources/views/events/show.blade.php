@@ -5,17 +5,44 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1>Detalles del Evento: {{ $event->name }}</h1>
-        <a href="{{ route('events.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left mr-1"></i>
-            Volver
-        </a>
+        <div>
+            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#editEventModal">
+                <i class="fas fa-edit mr-1"></i>
+                Editar Evento
+            </button>
+            <a href="{{ route('events.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i>
+                Volver
+            </a>
+        </div>
     </div>
 @stop
 
 @section('content')
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-md-8">
             <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Información del Evento</h3>
+                </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -131,6 +158,95 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Evento -->
+    <div class="modal fade" id="editEventModal" tabindex="-1" role="dialog" aria-labelledby="editEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editEventModalLabel">Editar Información del Evento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('events.update', $event->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="name">Nombre del Evento <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ $event->name }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type">Tipo de Evento <span class="text-danger">*</span></label>
+                            <select class="form-control" id="type" name="type" required>
+                                <option value="Competition" {{ $event->type == 'Competition' ? 'selected' : '' }}>Competición</option>
+                                <option value="Promotion_Test" {{ $event->type == 'Promotion_Test' ? 'selected' : '' }}>Examen de Promoción</option>
+                                <option value="Training" {{ $event->type == 'Training' ? 'selected' : '' }}>Entrenamiento</option>
+                                <option value="Other" {{ $event->type == 'Other' ? 'selected' : '' }}>Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue_id">Sede</label>
+                            <select class="form-control" id="venue_id" name="venue_id">
+                                <option value="">Seleccionar sede...</option>
+                                @foreach($venues as $venue)
+                                    <option value="{{ $venue->id }}" {{ $event->venue_id == $venue->id ? 'selected' : '' }}>
+                                        {{ $venue->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="start_date">Fecha de Inicio</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" 
+                                           value="{{ $event->start_date ? $event->start_date->format('Y-m-d') : '' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="end_date">Fecha de Fin</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date" 
+                                           value="{{ $event->end_date ? $event->end_date->format('Y-m-d') : '' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="registration_deadline">Fecha Límite de Inscripción</label>
+                                    <input type="date" class="form-control" id="registration_deadline" name="registration_deadline" 
+                                           value="{{ $event->registration_deadline ? $event->registration_deadline->format('Y-m-d') : '' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Descripción</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ $event->description }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Estado <span class="text-danger">*</span></label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option value="Planned" {{ $event->status == 'Planned' ? 'selected' : '' }}>Planificado</option>
+                                <option value="Active" {{ $event->status == 'Active' ? 'selected' : '' }}>Activo</option>
+                                <option value="Completed" {{ $event->status == 'Completed' ? 'selected' : '' }}>Completado</option>
+                                <option value="Cancelled" {{ $event->status == 'Cancelled' ? 'selected' : '' }}>Cancelado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

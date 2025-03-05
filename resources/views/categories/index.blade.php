@@ -52,7 +52,6 @@
                                     <th scope="col">Rango Edad</th>
                                     <th scope="col">Rango Peso</th>
                                     <th scope="col">Genero</th>
-                                    <th scope="col" class="text-center">Estado</th>
                                     <th scope="col" class="text-end px-4">Acciones</th>
                                 </tr>
                             </thead>
@@ -79,18 +78,6 @@
                                         <td>{{ $category->min_age.' - '.$category->max_age ?? 'No registrado' }}</td>
                                         <td>{{ $category->min_weight.'Kg. '.' - '.$category->max_weight.'Kg. ' ?? 'No registrado' }}</td>
                                         <td>{{ $category->gender ?? 'No registrado' }}</td>
-                                        <td class="text-center">
-                                            <form action="{{ route('categories.toggle-status', $category->id) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    class="btn btn-sm {{ $category->status === 'Active' ? 'btn-success' : ($category->status === 'Inactive' ? 'btn-danger' : 'btn-warning') }}"
-                                                    title="Click para cambiar estado">
-                                                    {{ $category->status === 'Active' ? 'Activa' : 'Inactiva' }}
-                                                </button>
-                                            </form>
-                                        </td>
                                         <td class="text-center">
                                             <a href="{{ route('categories.show', $category->id) }}" class="btn btn-sm btn-info me-2">
                                                 <i class="fas fa-eye"></i>

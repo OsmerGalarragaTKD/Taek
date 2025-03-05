@@ -23,7 +23,8 @@
             </form>
         @endif
 
-        @if(in_array($pago->payment_type, ['Monthly_Fee', 'Event_Registration']))
+        <!-- Only show the Generate Receipt button if payment status is Completed -->
+        @if(in_array($pago->payment_type, ['Monthly_Fee', 'Event_Registration']) && $pago->status === 'Completed')
             <a href="{{ route('payments.receipt', $pago->id) }}" class="btn btn-info btn-block mb-3">
                 <i class="fas fa-file-pdf mr-1"></i>
                 Generar Recibo
@@ -42,4 +43,3 @@
         </form>
     </div>
 </div>
-

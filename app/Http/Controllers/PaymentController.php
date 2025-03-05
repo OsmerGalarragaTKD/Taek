@@ -369,12 +369,13 @@ class PaymentController extends Controller
 
     public function userPayment()
     {
-        return view('payments.user-payment');
+        $events = Event::where('status', 'Planned')->get();
+        return view('payments.user-payment', compact('events'));
     }
 
     public function userStore(Request $request)
     {
-        // Validación de los datos del formulario (sin athlete_id)
+        // Validación de los datos del formulario
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
@@ -397,33 +398,28 @@ class PaymentController extends Controller
 
             // Obtener el athlete_id del usuario autenticado
             $athlete_id = Auth::user()->id;
-            $athlete_id -= 1;
 
             // Procesar la subida del archivo (comprobante de pago)
             $receipt_path = null;
             if ($request->hasFile('receipt_url')) {
-                $file = $request->file('receipt_url');
-                $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-
-                // Guardar el archivo en el directorio storage/app/public/receipts
-                $storage_path = storage_path('app/public/receipts');
-                if (!file_exists($storage_path)) {
-                    mkdir($storage_path, 0755, true); // Crear el directorio si no existe
-                }
-
-                // Mover el archivo al directorio
-                $file->move($storage_path, $filename);
-                $receipt_path = 'receipts/' . $filename;
-
-                // Verificar que el archivo se movió correctamente
-                if (!file_exists($storage_path . '/' . $filename)) {
-                    throw new \Exception('Error al guardar el archivo');
-                }
+                $receipt_path = $request->file('receipt_url')->store('receipts', 'public');
             }
+
+            /* dd(
+              [ 'athlete_id' => $athlete_id, 
+                'amount' => $request->amount,
+                'payment_date' => $request->payment_date,
+                'payment_type' => $request->payment_type,
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'receipt_url' => $receipt_path,
+                'notes' => $request->notes,
+                'status' => 'Pending' ]
+            ); */
 
             // Crear el pago en la base de datos
             Payment::create([
-                'athlete_id' => $athlete_id, // Usar el athlete_id del usuario autenticado
+                'athlete_id' => $athlete_id, 
                 'amount' => $request->amount,
                 'payment_date' => $request->payment_date,
                 'payment_type' => $request->payment_type,

@@ -3,7 +3,7 @@
 @section('content')
     <div class="container-fluid py-4">
 
-        @role('Super Admin')
+        {{-- @role('Super Admin')
             <div class="col-md-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center justify-content-center">
@@ -21,14 +21,15 @@
                     {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                {{--   @if (session('output'))
+                  @if (session('output'))
                     <div class="debug-output">
                         <h4>Detalles técnicos:</h4>
                         <pre>{{ session('output') }}</pre>
                     </div>
-                @endif --}}
+                @endif
             @endif
-        @endrole
+        @endrole --}}
+        
         <!-- Estadísticas Generales -->
 
         <div class="row g-3 mb-4">

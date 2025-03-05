@@ -17,6 +17,10 @@ class Payment extends Model
         'amount',
         'status',
         'payment_date',
+        'payment_method',  // Make sure this is included
+        'reference_number', // Make sure this is included
+        'receipt_url',
+        'notes',
     ];
 
     protected $casts = [
