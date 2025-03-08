@@ -98,7 +98,12 @@ class PaymentController extends Controller
                 );
             }
 
-
+            SystemLogController::log(
+                'crear',
+                'Payment',
+                $payment->id,
+                'Creado nuevo pago para atleta ID: ' . $request->athlete_id . ' - Monto: ' . $request->amount
+            );
 
             DB::commit();
 
@@ -153,6 +158,13 @@ class PaymentController extends Controller
                 'status' => 'Completed',
                 'updated_at' => now()
             ]);
+
+            SystemLogController::log(
+                'aprobar',
+                'Payment',
+                $payment->id,
+                'Aprobado el pago para atleta ID: ' . $payment->athlete_id
+            );
 
             DB::commit();
             return redirect()->back()
@@ -211,6 +223,13 @@ class PaymentController extends Controller
                     'status' => 'Completed',
                     'updated_at' => now()
                 ]);
+
+                SystemLogController::log(
+                    'aprobar',
+                    'Payment',
+                    $payment->id,
+                    'Aprobado el pago para atleta ID: ' . $payment->athlete_id
+                );
             }
 
             DB::commit();
@@ -263,6 +282,13 @@ class PaymentController extends Controller
                 $receiptPath = $this->generateAndStoreReceipt($payment);
                 $payment->update(['receipt_pdf' => $receiptPath]);
             }
+
+            SystemLogController::log(
+                'actualizar',
+                'Payment',
+                $payment->id,
+                'Actualizados detalles de pago para atleta ID: ' . $payment->athlete_id
+            );
 
             DB::commit();
             return redirect()->route('payments.show', $payment->id)

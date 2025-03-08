@@ -52,11 +52,10 @@ class VenueController extends Controller
         }
 
 
-
         try {
             DB::beginTransaction();
 
-            Venue::create([
+            $venue = Venue::create([
                 'name' => $request->name,
                 'address_state' => $request->address_state,
                 'address_city' => $request->address_city,
@@ -68,6 +67,13 @@ class VenueController extends Controller
                 'email' => $request->email,
                 'status' => $request->status,
             ]);
+
+            SystemLogController::log(
+                'crear',
+                'Venue',
+                $venue->id,
+                'Creada nueva sede: ' . $request->name
+            );
 
             DB::commit();
 
@@ -142,6 +148,13 @@ class VenueController extends Controller
                 'email' => $request->email,
                 'status' => $request->status,
             ]);
+
+            SystemLogController::log(
+                'actualizar',
+                'Venue',
+                $venue->id,
+                'Actualizada sede: ' . $venue->name
+            );
 
             DB::commit();
 

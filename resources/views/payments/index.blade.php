@@ -40,6 +40,7 @@
                             <th>Método</th>
                             <th>Estado</th>
                             <th>Referencia</th>
+                            <th>Fecha</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -88,6 +89,7 @@
                                     </span>
                                 </td>
                                 <td>{{ $payment->reference_number ?? 'N/A' }}</td>
+                                <td>{{ $payment->created_at->format('d/m/Y') }}</td>
                                 <td>
                                     <div class="btn-group">
                                         <a href="{{ route('payments.show', $payment->id) }}" 

@@ -56,6 +56,12 @@ class BeltGradeController extends Controller
                 'description' => $request->description,
             ]);
 
+            SystemLogController::log(
+                'crear',
+                'BeltGrade',
+                $belt->id,
+                'Creado nuevo grado de cinturón: ' . $request->name
+            );
 
             DB::commit();
 
@@ -120,6 +126,13 @@ class BeltGradeController extends Controller
                 'description'
             ]));
 
+            SystemLogController::log(
+                'actualizar',
+                'BeltGrade',
+                $belt->id,
+                'Actualizado grado de cinturón: ' . $belt->name
+            );
+
             DB::commit();
 
             return redirect()->route('belts.index')
@@ -145,6 +158,13 @@ class BeltGradeController extends Controller
             $belt = BeltGrade::findOrFail($id);
 
             $belt->delete();
+
+            SystemLogController::log(
+                'eliminar',
+                'BeltGrade',
+                $belt->id,
+                'Eliminado grado de cinturón: ' . $belt->name
+            );
 
             DB::commit();
 

@@ -60,7 +60,7 @@
         /* Contenido de la constancia */
         .content {
             text-align: justify;
-            font-size: 12px; /* Tamaño de fuente reducido */
+            font-size: 14px; /* Tamaño de fuente reducido */
             margin-bottom: 20px;
         }
 
@@ -109,11 +109,10 @@
                 "JUAN JOSÉ ROJAS"
             </div>
             <div class="contact-info">
-                0412-0911798 / 0416-6835193<br>
+                0412-0911798 / 0424-8667823<br>
                 COMPLEJO POLIDEPORTIVO SIMÓN BOLÍVAR,<br>
                 AV INTERCOMUNAL, BNA, EDO ANZOÁTEGUI<br>
-                juanjosertkd@gmail.com<br>
-                rreinosa86@gmail.com<br>
+                juanjosertkd@gmail.com / camposmillanc@gmail.com<br>
                 RIF: V-06643926-3
             </div>
             <div class="affiliations">
@@ -160,24 +159,23 @@
         <div class="signature">
             <div class="signature-line"></div>
             <div class="signature-name">JUAN JOSE ROJAS</div>
-            <div class="signature-title">G.M VII DAN</div>
             <div class="signature-title">Presidente</div>
             <div class="signature-title">V-6.643.926</div>
-            <div class="signature-title">0412-0911798</div>
+            <div class="signature-title">G.M VII DAN</div>
         </div>
         <!-- Firma 2 -->
         <div class="signature">
             <div class="signature-line"></div>
-            <div class="signature-name">CARMEN McCAMPOS</div>
+            <div class="signature-name">CARMEN M CAMPOS</div>
             <div class="signature-title">Secretaria General</div>
-            <div class="signature-title">V-6.9M 3171</div>
+            <div class="signature-title">V-6.981.871</div>
         </div>
         <!-- Firma 3 -->
         <div class="signature">
             <div class="signature-line"></div>
             <div class="signature-name">JOSE VELASQUEZ</div>
             <div class="signature-title">Vice-Presidente</div>
-            <div class="signature-title">V-I.1000-153</div>
+            <div class="signature-title">V-11.909.153</div>
         </div>
     </div>
 </body>

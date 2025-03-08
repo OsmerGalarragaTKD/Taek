@@ -65,6 +65,13 @@ class CategoryController extends Controller
                 'description' => $request->description,
             ]);
 
+            SystemLogController::log(
+                'crear',
+                'Category',
+                $category->id,
+                'Creada nueva categoría: ' . $category->name
+            );
+
             DB::commit();
 
             return redirect()->route('categories.index')
@@ -131,6 +138,12 @@ class CategoryController extends Controller
                 'min_weight','max_weight','gender','disability_type',
                 'description',]));
 
+            SystemLogController::log(
+                'actualizar',
+                'Category',
+                $category->id,
+                'Actualizada categoría: ' . $category->name
+            );
 
             DB::commit();
 
@@ -185,6 +198,13 @@ class CategoryController extends Controller
             $category = Category::findOrFail($id);
 
             $category->delete();
+
+            SystemLogController::log(
+                'eliminar',
+                'Category',
+                $id,
+                'Eliminada categoría: ' . $category->name
+            );
 
             DB::commit();
 

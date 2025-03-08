@@ -11,6 +11,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SystemLogController;
 use App\Http\Controllers\VenueController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +58,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/categories/{id}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
 
     Route::get('/payments/{id}/receipt', [PaymentController::class, 'generateReceipt'])->name('payments.receipt');
+    //Route::get('/logs', [SystemLogController::class, 'index'])->name('logs.index');
+    //Route::get('/logs', [SystemLogController::class, 'index'])->name('logs.index');
+    Route::resource('/logs', SystemLogController::class);
+
 });
 
 Route::resource('/roles', RoleController::class)->middleware('auth');

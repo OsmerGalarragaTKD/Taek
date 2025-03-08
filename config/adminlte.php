@@ -172,7 +172,7 @@ return [
     */
 
     'classes_auth_card' => '',
-    'classes_auth_header' => 'bg-gradient-info',
+    'classes_auth_header' => 'bg-gradient-dark',
     'classes_auth_body' => '',
     'classes_auth_footer' => 'text-center',
     'classes_auth_icon' => 'fa-lg text-info',
@@ -360,6 +360,12 @@ return [
             'url' => 'roles',
             'icon' => 'fas fa-users',
             'can' => 'gestionar_permisos'
+        ],
+        [
+            'text' => 'Logs',
+            'url' => 'logs',
+            'icon' => 'fas fa-users',
+            //'can' => 'gestionar_permisos'
         ],
         
     ],

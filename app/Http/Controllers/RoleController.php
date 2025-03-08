@@ -60,6 +60,12 @@ class RoleController extends Controller
             $role = Role::create(['name' => $request->name]);
             $role->syncPermissions($request->permissions);
 
+            SystemLogController::log(
+                'crear',
+                'Role',
+                $role->id,
+                'Creado nuevo rol: ' . $role->name
+            );
 
             DB::commit();
             Log::info("Rol creado: {$role->name}");
@@ -132,6 +138,13 @@ class RoleController extends Controller
             // Sincronizar los permisos usando nombres
             $role->syncPermissions($permissions);
 
+            SystemLogController::log(
+                'actualizar',
+                'Role',
+                $role->id,
+                'Actualizado rol: ' . $role->name
+            );
+
             DB::commit();
             Log::info("Rol actualizado: {$role->name}");
 
@@ -154,6 +167,13 @@ class RoleController extends Controller
             $role = Role::findOrFail($id);
             $roleName = $role->name;
             $role->delete();
+
+            SystemLogController::log(
+                'eliminar',
+                'Role',
+                $id,
+                'Eliminado rol: ' . $roleName
+            );
 
             DB::commit();
             Log::info("Rol eliminado: {$roleName}");
@@ -185,6 +205,13 @@ class RoleController extends Controller
             }
 
             $user->syncRoles(Role::whereIn('id', $request->roles)->get());
+
+            SystemLogController::log(
+                'actualizar',
+                'User',
+                $user->id,
+                'Actualizados roles para usuario: ' . $user->name
+            );
 
             return response()->json([
                 'success' => true,

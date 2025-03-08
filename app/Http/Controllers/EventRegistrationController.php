@@ -98,6 +98,14 @@ class EventRegistrationController extends Controller
                 'notes' => $request->notes,
             ]);
 
+
+            SystemLogController::log(
+                'crear',
+                'EventRegistration',
+                $registration->id,
+                'Registrado atleta ID: ' . $request->athlete_id . ' para evento ID: ' . $request->event_id
+            );
+
             DB::commit();
 
             return redirect()->route('events.show', $request->event_id)
@@ -123,6 +131,12 @@ class EventRegistrationController extends Controller
     {
         try {
             $registration->delete();
+            SystemLogController::log(
+                'eliminar',
+                'EventRegistration',
+                $registration->id,
+                'Eliminado registro para atleta ID: ' . $registration->athlete_id . ' del evento ID: ' . $registration->event_id
+            );
             return redirect()->back()->with('success', 'Registro eliminado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error al eliminar el registro.');

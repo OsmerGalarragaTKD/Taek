@@ -9,17 +9,25 @@ class SystemLog extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'user_type',
-        'user_id',
         'action',
-        'entity_type',
-        'entity_id',
+        'model',
+        'model_id',
+        'user_id',
         'details',
-        'ip_address',
     ];
 
-    protected $casts = [
-        'details' => 'array',
-    ];
+    /**
+     * Get the user that performed the action.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
+

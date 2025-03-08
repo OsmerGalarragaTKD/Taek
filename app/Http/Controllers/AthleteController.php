@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use App\Http\Controllers\SystemLogController; // Added import
+
 
 
 class AthleteController extends Controller
@@ -166,6 +168,13 @@ class AthleteController extends Controller
                 // Aquí se podría enviar un email con la contraseña temporal
             }
 
+            SystemLogController::log(
+                'crear',
+                'Athlete',
+                $athlete->id,
+                'Creado nuevo atleta: ' . $athlete->full_name
+            );
+
             DB::commit();
 
             return redirect()->route('athlete.index')
@@ -307,6 +316,13 @@ class AthleteController extends Controller
                 );
             }
 
+            SystemLogController::log(
+                'actualizar',
+                'Athlete',
+                $athlete->id,
+                'Actualizada información del atleta: ' . $athlete->full_name
+            );
+
             DB::commit();
 
             return redirect()->route('athlete.show', $athlete->id)
@@ -338,6 +354,13 @@ class AthleteController extends Controller
             };
 
             $athlete->update(['status' => $newStatus]);
+
+            SystemLogController::log(
+                'actualizar',
+                'Athlete',
+                $athlete->id,
+                'Cambiado estado del atleta a: ' . $newStatus
+            );
 
             DB::commit();
 
@@ -406,6 +429,13 @@ class AthleteController extends Controller
 
             // Eliminar el atleta
             $athlete->delete();
+
+            SystemLogController::log(
+                'eliminar',
+                'Athlete',
+                $id,
+                'Eliminado atleta: ' . $athlete->full_name
+            );
 
             DB::commit();
 

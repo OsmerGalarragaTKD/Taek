@@ -81,6 +81,13 @@ class EventController extends Controller
                 }
             }
 
+            SystemLogController::log(
+                'crear',
+                'Event',
+                $event->id,
+                'Creado nuevo evento: ' . $event->name
+            );
+
             DB::commit();
 
             return redirect()->route('events.index')
@@ -167,6 +174,13 @@ class EventController extends Controller
                 }
             }
 
+            SystemLogController::log(
+                'actualizar',
+                'Event',
+                $event->id,
+                'Actualizado evento: ' . $event->name
+            );
+
             DB::commit();
 
             return redirect()->route('events.index')
@@ -211,6 +225,13 @@ class EventController extends Controller
                     ]);
                 }
             }
+
+            SystemLogController::log(
+                'actualizar',
+                'Event',
+                $event->id,
+                'Actualizadas categorías para evento: ' . $event->name
+            );
 
             DB::commit();
 

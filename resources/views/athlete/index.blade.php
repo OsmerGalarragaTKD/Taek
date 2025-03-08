@@ -41,7 +41,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table id="athleteTable" class="table table-hover mb-0">
-                                <thead class="table-light">
+                                <thead >
                                     <tr>
                                         <th scope="col" class="px-4">Nombre</th>
                                         <th scope="col">Documento</th>
@@ -190,7 +190,6 @@
         </style>
         <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css')}}">
         <link rel="stylesheet" href="{{asset('css/buttons.bootstrap4.min.css')}}">
-        
     @endpush
 
     @push('js')
@@ -232,45 +231,8 @@
                             }
                         }
                     ],
-                    "language": {
-                        "sProcessing": "Procesando...",
-                        "sLengthMenu": "Mostrar _MENU_ registros",
-                        "sZeroRecords": "No se encontraron resultados",
-                        "sEmptyTable": "Ningún dato disponible en esta tabla",
-                        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-                        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-                        "sInfoPostFix": "",
-                        "sSearch": "Buscar:",
-                        "sUrl": "",
-                        "sInfoThousands": ",",
-                        "sLoadingRecords": "Cargando...",
-                        "oPaginate": {
-                            "sFirst": "Primero",
-                            "sLast": "Último",
-                            "sNext": "Siguiente",
-                            "sPrevious": "Anterior"
-                        },
-                        "oAria": {
-                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-                        }
-                    },
-                    "responsive": true,
-                    "autoWidth": false,
-                    "order": [
-                        [0, 'asc']
-                    ],
-                    "pageLength": 10,
-                    "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                        '<"row"<"col-sm-12"tr>>' +
-                        '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-                    "columnDefs": [{
-                        "targets": -1, // Última columna (acciones)
-                        "orderable": false // No permitir ordenar
-                    }]
                 });
-                
+
 
                 // Auto-cerrar alertas después de 5 segundos
                 window.setTimeout(function() {
