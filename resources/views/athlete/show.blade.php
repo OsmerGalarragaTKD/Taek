@@ -227,6 +227,19 @@
                                             <label class="text-muted d-block">Redes Sociales</label>
                                             <span class="fs-6">{{ $athlete->social_media ?? 'No registrado' }}</span>
                                         </div>
+                                        <!-- Contacto de Emergencia -->
+                                        <div class="mb-3">
+                                            <label class="text-muted d-block">Contacto de Emergencia</label>
+                                            <span class="fs-6">{{ $athlete->emergency_contact_name ?? 'No registrado' }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted d-block">Teléfono de Emergencia</label>
+                                            <span class="fs-6">{{ $athlete->emergency_contact_phone ?? 'No registrado' }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted d-block">Relación</label>
+                                            <span class="fs-6">{{ $athlete->emergency_contact_relation ?? 'No registrado' }}</span>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <h5 class="border-bottom pb-2">Dirección</h5>
@@ -572,7 +585,6 @@
                                 <label class="form-label">Nivel Académico</label>
                                 <select class="form-select @error('academic_level') is-invalid @enderror" 
                                         name="academic_level">
-                                    <option ```blade
                                     <option value="">Seleccionar</option>
                                     <option value="Primaria" {{ old('academic_level', $athlete->academic_level) == 'Primaria' ? 'selected' : '' }}>
                                         Primaria
@@ -648,6 +660,49 @@
                                        name="social_media"
                                        value="{{ old('social_media', $athlete->social_media) }}">
                                 @error('social_media')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Contacto de Emergencia -->
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mt-2">Contacto de Emergencia</h6>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nombre del Contacto</label>
+                                <input type="text" 
+                                       class="form-control @error('emergency_contact_name') is-invalid @enderror" 
+                                       name="emergency_contact_name"
+                                       id="emergency_contact_name"
+                                       value="{{ old('emergency_contact_name', $athlete->emergency_contact_name) }}"
+                                       pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                                       title="Solo letras y espacios">
+                                @error('emergency_contact_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Teléfono de Emergencia</label>
+                                <input type="text" 
+                                       class="form-control @error('emergency_contact_phone') is-invalid @enderror" 
+                                       name="emergency_contact_phone"
+                                       id="emergency_contact_phone"
+                                       value="{{ old('emergency_contact_phone', $athlete->emergency_contact_phone) }}"
+                                       pattern="[0-9+\-()\s]{8,15}"
+                                       title="Formato válido: +58 412-1234567">
+                                @error('emergency_contact_phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Relación</label>
+                                <input type="text" 
+                                       class="form-control @error('emergency_contact_relation') is-invalid @enderror" 
+                                       name="emergency_contact_relation"
+                                       id="emergency_contact_relation"
+                                       value="{{ old('emergency_contact_relation', $athlete->emergency_contact_relation) }}"
+                                       maxlength="50">
+                                @error('emergency_contact_relation')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -753,6 +808,7 @@
                                         name="shirt_size">
                                     <option value="">Seleccionar</option>
                                     <option value="XS" {{ old('shirt_size', $athlete->shirt_size) == 'XS' ? 'selected' : '' }}>XS</option>
+                                    <option  == 'XS' ? 'selected' : '' }}>XS</option>
                                     <option value="S" {{ old('shirt_size', $athlete->shirt_size) == 'S' ? 'selected' : '' }}>S</option>
                                     <option value="M" {{ old('shirt_size', $athlete->shirt_size) == 'M' ? 'selected' : '' }}>M</option>
                                     <option value="L" {{ old('shirt_size', $athlete->shirt_size) == 'L' ? 'selected' : '' }}>L</option>
@@ -1258,5 +1314,3 @@
     })
 </script>
 @stop
-
-

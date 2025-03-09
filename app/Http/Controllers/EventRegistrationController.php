@@ -89,7 +89,7 @@ class EventRegistrationController extends Controller
 
            
 
-            EventRegistration::create([
+            $registration = EventRegistration::create([
                 'event_id' => $request->event_id,
                 'athlete_id' => $request->athlete_id,
                 'category_id' => $request->category_id,

@@ -107,7 +107,7 @@ class PaymentController extends Controller
 
             DB::commit();
 
-            return redirect()->back()
+            return redirect()->route('payments.index')
                 ->with('success', 'Pago aprobado exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();

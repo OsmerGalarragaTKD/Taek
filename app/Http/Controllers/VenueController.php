@@ -31,19 +31,36 @@ class VenueController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(),[
-            'name' => 'required|string',
-            'address_state' => 'nullable|string',
-            'address_city' => 'nullable|string',
-            'address_parish' => 'nullable|string',
-            'address_details' => 'nullable|string',
-            'founding_date' => 'nullable|date',
-            'director_name' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'email' => 'nullable|email',
+        $rules = [
+            'name' => 'required|string|max:255',
+            'address_state' => 'nullable|string|max:255',
+            'address_city' => 'nullable|string|max:255',
+            'address_parish' => 'nullable|string|max:255',
+            'founding_date' => [
+                'nullable',
+                'date',
+                'before_or_equal:' . now()->subYears(2)->format('Y-m-d'), // Máximo 200 años atrás
+                'after_or_equal:' . now()->subYears(100)->format('Y-m-d'), // Máximo 200 años atrás
+            ],
+            'address_details' => 'nullable|string|max:1000',
+            'director_name' => 'nullable|string|max:255',
+            'phone' => [
+                'nullable',
+                'string',
+                'regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/',
+            ],
+            'email' => 'nullable|email|max:255',
             'status' => 'required|in:Active,Inactive',
-        ]);
+        ];
+    
+        // Mensajes personalizados para las validaciones
+        $messages = [
+            'founding_date.before_or_equal' => 'La fecha de fundación no puede ser mayor a 200 años atrás.',
+            'founding_date.after_or_equal' => 'La fecha de fundación no puede ser mayor a 200 años atrás.',
+            'phone.regex' => 'El formato del teléfono no es válido.',
+        ];
 
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return redirect()->back()

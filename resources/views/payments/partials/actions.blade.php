@@ -31,7 +31,7 @@
             </a>
         @endif
 
-        <form action="{{ route('payments.destroy', $pago->id) }}" method="POST">
+        {{-- <form action="{{ route('payments.destroy', $pago->id) }}" method="POST">
             @csrf
             @method('DELETE')
             <button type="submit" 
@@ -40,6 +40,6 @@
                 <i class="fas fa-trash mr-1"></i>
                 Eliminar Pago
             </button>
-        </form>
+        </form> --}}
     </div>
 </div>

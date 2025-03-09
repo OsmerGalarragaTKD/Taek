@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => 'Escuela de Taekwondo "Juan José Rojas"',
+    'logo' => 'ESC TKD JJR',
     'logo_img' => 'img/taek.jpg',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,

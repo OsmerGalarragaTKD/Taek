@@ -57,15 +57,14 @@ class Athlete extends Model
         return $this->belongsTo(Venue::class, 'venue_id');
     }
 
+    public function currentGrade()
+    {
+        return $this->hasOne(AthleteGrade::class)->latestOfMany();
+    }
+
     public function grades()
     {
         return $this->hasMany(AthleteGrade::class);
-    }
-
-    // Obtener el grado actual (el más reciente)
-    public function currentGrade()
-    {
-        return $this->hasOne(AthleteGrade::class)->latest('date_achieved');
     }
 
     // Relación con los representantes

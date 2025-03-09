@@ -263,6 +263,19 @@ class AthleteController extends Controller
             'shoe_size' => 'nullable|string|max:10',
             'medical_conditions' => 'nullable|string|max:1000',
             'allergies' => 'nullable|string|max:1000',
+            'emergency_contact_name' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[\pL\s]+$/u'
+            ],
+            'emergency_contact_phone' => [
+                'nullable',
+                'string',
+                'max:15',
+                'regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/'
+            ],
+            'emergency_contact_relation' => 'nullable|string|max:50',
         ];
 
         // Validación adicional para el representante si el atleta es menor de edad
@@ -304,7 +317,26 @@ class AthleteController extends Controller
                         'email' => $request->representative_email,
                     ]
                 );
+            }
 
+            if ($request->filled('belt_grade_id')) {
+                Log::info('Actualizando grado del atleta:', [
+                    'athlete_id' => $athlete->id,
+                    'belt_grade_id' => $request->belt_grade_id,
+                    'date_achieved' => $request->grade_date_achieved,
+                    'certificate_number' => $request->grade_certificate_number,
+                ]);
+
+                // Create a new grade record
+                AthleteGrade::create([
+                    'athlete_id' => $athlete->id,
+                    'grade_id' => $request->belt_grade_id,
+                    'date_achieved' => $request->grade_date_achieved,
+                    'certificate_number' => $request->grade_certificate_number,
+                ]);
+            }
+
+            if ($isMinor && isset($representative)) {
                 AthleteRepresentatives::updateOrCreate(
                     [
                         'athlete_id' => $athlete->id,

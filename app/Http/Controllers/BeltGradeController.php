@@ -48,7 +48,7 @@ class BeltGradeController extends Controller
         try {
             DB::beginTransaction();
 
-            BeltGrade::create([
+            $belt = BeltGrade::create([
                 'type' => $request->type,
                 'level' => $request->level,
                 'name' => $request->name,

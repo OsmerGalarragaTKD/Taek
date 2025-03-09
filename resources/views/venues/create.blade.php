@@ -29,7 +29,8 @@
                         <div class="mb-3">
                             <label for="name" class="form-label">Nombre de la Sede</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                   id="name" name="name" value="{{ old('name') }}" required>
+                                   id="name" name="name" value="{{ old('name') }}" 
+                                   required maxlength="255">
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -73,7 +74,8 @@
                                 <div class="mb-3">
                                     <label for="founding_date" class="form-label">Fecha de Fundación</label>
                                     <input type="date" class="form-control @error('founding_date') is-invalid @enderror" 
-                                           id="founding_date" name="founding_date" value="{{ old('founding_date') }}">
+                                           id="founding_date" name="founding_date" value="{{ old('founding_date') }}" 
+                                           min="{{ now()->subYears(200)->format('Y-m-d') }}" max="{{ now()->subYears(2)->format('Y-m-d') }}">
                                     @error('founding_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -104,7 +106,8 @@
                                 <div class="mb-3">
                                     <label for="phone" class="form-label">Teléfono</label>
                                     <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
-                                           id="phone" name="phone" value="{{ old('phone') }}">
+                                           id="phone" name="phone" value="{{ old('phone') }}" 
+                                           pattern="^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$">
                                     @error('phone')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -146,4 +149,55 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', function (event) {
+        let isValid = true;
+
+        // Validar el nombre
+        const nameInput = document.getElementById('name');
+        if (nameInput.value.trim() === '') {
+            isValid = false;
+            alert('El nombre de la sede es obligatorio.');
+        }
+
+        // Validar el teléfono
+        const phoneInput = document.getElementById('phone');
+        const phonePattern = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+        if (phoneInput.value && !phonePattern.test(phoneInput.value)) {
+            isValid = false;
+            alert('El formato del teléfono no es válido.');
+        }
+
+        // Validar la fecha de fundación
+        const foundingDateInput = document.getElementById('founding_date');
+        const today = new Date(); // Fecha actual
+        const minDate = new Date();
+        minDate.setFullYear(today.getFullYear() - 200); // 200 años atrás
+
+        if (foundingDateInput.value) {
+            const selectedDate = new Date(foundingDateInput.value);
+
+            if (selectedDate > today) {
+                isValid = false;
+                alert('La fecha de fundación no puede ser mayor a la fecha actual.');
+            } else if (selectedDate < minDate) {
+                isValid = false;
+                alert('La fecha de fundación no puede ser menor a 200 años atrás.');
+            }
+        }
+
+        // Si no es válido, prevenir el envío del formulario
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+});
+</script>    
+@endpush
+
 @endsection
