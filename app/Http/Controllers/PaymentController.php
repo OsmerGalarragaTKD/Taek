@@ -408,7 +408,7 @@ class PaymentController extends Controller
             'payment_type' => 'required|in:Monthly_Fee,Event_Registration,Equipment,Other',
             'payment_method' => 'required|in:Transfer,Card',
             'reference_number' => 'required|string|max:255',
-            'receipt_url' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Tamaño máximo de 2MB
+            'receipt_url' => 'image|mimes:jpeg,png,jpg|max:2048', // Tamaño máximo de 2MB
             'notes' => 'nullable|string',
         ]);
 

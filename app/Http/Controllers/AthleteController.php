@@ -271,10 +271,11 @@ class AthleteController extends Controller
             $rules['representative_birth_date'] = [
                 'required',
                 'date',
-                'before_or_equal:' . $minDateRepresentative, // Máximo 200 años
-                'after_or_equal:' . $request->birth_date, // No puede ser menor que el atleta
+                'after_or_equal:' . $minDateRepresentative, // Máximo 200 años
+                'before_or_equal:' . $request->birth_date, // No puede ser menor que el atleta
             ];
         }
+
 
         $validator = Validator::make($request->all(), $rules);
 
