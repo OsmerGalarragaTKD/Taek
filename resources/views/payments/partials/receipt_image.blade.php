@@ -10,12 +10,12 @@
         </div>
         <div class="card-body">
             <div class="text-center">
-                <img src="{{ Storage::url($pago->receipt_url) }}" 
+                <img src="{{ asset($pago->receipt_url) }}" 
                      alt="Comprobante de pago" 
                      class="img-fluid rounded">
             </div>
             <div class="text-center mt-3">
-                <a href="{{ Storage::url($pago->receipt_url) }}" 
+                <a href="{{ asset($pago->receipt_url) }}" 
                    class="btn btn-info" 
                    target="_blank">
                     <i class="fas fa-external-link-alt mr-1"></i>

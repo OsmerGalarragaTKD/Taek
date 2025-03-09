@@ -428,20 +428,10 @@ class PaymentController extends Controller
             // Procesar la subida del archivo (comprobante de pago)
             $receipt_path = null;
             if ($request->hasFile('receipt_url')) {
-                $receipt_path = $request->file('receipt_url')->store('receipts', 'public');
+                // Guardar el archivo en la carpeta public/receipts
+                $receipt_path = 'receipts/' . $request->file('receipt_url')->hashName();
+                $request->file('receipt_url')->move(public_path('receipts'), $receipt_path);
             }
-
-            /* dd(
-              [ 'athlete_id' => $athlete_id, 
-                'amount' => $request->amount,
-                'payment_date' => $request->payment_date,
-                'payment_type' => $request->payment_type,
-                'payment_method' => $request->payment_method,
-                'reference_number' => $request->reference_number,
-                'receipt_url' => $receipt_path,
-                'notes' => $request->notes,
-                'status' => 'Pending' ]
-            ); */
 
             // Crear el pago en la base de datos
             Payment::create([
