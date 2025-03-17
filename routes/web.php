@@ -14,7 +14,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SystemLogController;
 use App\Http\Controllers\VenueController;
 use Illuminate\Support\Facades\Route;
-
+ 
 Route::get('/', function () {
     return view('welcome');
 });
