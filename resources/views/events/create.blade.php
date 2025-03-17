@@ -41,10 +41,11 @@
                                         <option value="Competition" {{ old('type') == 'Competition' ? 'selected' : '' }}>
                                             Competencia
                                         </option>
-                                        <option value="Promotion_Test"
+  <!--                                      <option value="Promotion_Test"
                                             {{ old('type') == 'Promotion_Test' ? 'selected' : '' }}>
                                             Examen de Promoción
                                         </option>
+-->
                                         <option value="Training" {{ old('type') == 'Training' ? 'selected' : '' }}>
                                             Entrenamiento
                                         </option>
@@ -144,9 +145,10 @@
                             <button type="button" id="add-category" class="btn btn-secondary mt-2">
                                 <i class="fas fa-plus"></i> Agregar Categoría
                             </button>
-                            <button type="button" id="add-category" class="btn btn-secondary mt-2">
+                          <!--  <button type="button" id="add-category" class="btn btn-secondary mt-2">
                                 <i class="fas fa-plus"></i> Agregar Categoría
                             </button>
+-->
                         </div>
 
                         <div class="text-right">
