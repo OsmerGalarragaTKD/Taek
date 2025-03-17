@@ -85,3 +85,8 @@ require __DIR__ . '/auth.php';
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/apoyo/download/manualjjr.pdf', 'ApoyoController@descargarManual');
+Route::get('/apoyo/download/manualjjr.pdf', 'ApoyoController@descargarManual');
+Route::match(['get', 'post'], '/apoyo', 'ApoyoController@index');
+Route::post('/apoyo/upload', 'ApoyoController@upload');

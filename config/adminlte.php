@@ -367,6 +367,19 @@ return [
             'icon' => 'fas fa-users',
             //'can' => 'gestionar_permisos'
         ],
+        [
+            'text' => 'Manual JJR',
+            'url' => '/apoyo/download/manualjjr.pdf',
+            'icon' => 'fas fa-file-pdf',
+            'target' => '_blank',
+            'download' => [
+                'text' => 'Descargar manualjjr.pdf',
+                'url' => '/apoyo/download/manualjjr.pdf',
+                'icon' => 'fas fa-download'
+            ]
+        ],
+
+        
         
     ],
 
