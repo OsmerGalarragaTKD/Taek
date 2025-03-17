@@ -50,9 +50,11 @@
                                 </p>
                             </div>
                             <div class="col-auto">
+                            @can('editar_atletas') 
                                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal">
                                     <i class="bi bi-pencil-square me-2"></i>Editar Información
                                 </button>
+                                @endcan
                             </div>
                         </div>
                     </div>

@@ -8,6 +8,7 @@ use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -16,6 +17,10 @@ class EventController extends Controller
      */
     public function index()
     {
+        if (!Auth::user()->can('ver_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver eventos.');
+        }
+
         $events = Event::all();
         return view('events.index', compact('events'));
     }
@@ -25,6 +30,10 @@ class EventController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('crear_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear eventos.');
+        }
+
         $venues = Venue::all();
         $categories = Category::all();
         return view('events.create', compact('venues', 'categories'));
@@ -35,6 +44,10 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('crear_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear eventos.');
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'type' => 'required|string|in:Competition,Promotion_Test,Training,Other',
@@ -106,6 +119,10 @@ class EventController extends Controller
      */
     public function show(string $id)
     {
+        if (!Auth::user()->can('ver_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver eventos.');
+        }
+
         $event = Event::findOrFail($id);
         $venues = Venue::all();
         $categories = Category::all();
@@ -117,7 +134,10 @@ class EventController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        if (!Auth::user()->can('editar_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar eventos.');
+        }
+
     }
 
     /**
@@ -125,6 +145,10 @@ class EventController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if (!Auth::user()->can('editar_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar eventos.');
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'type' => 'required|string|in:Competition,Promotion_Test,Training,Other',
@@ -196,6 +220,10 @@ class EventController extends Controller
 
     public function updateCategories(Request $request, $id)
     {
+        if (!Auth::user()->can('editar_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar eventos.');
+        }
+
         $event = Event::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
@@ -251,6 +279,9 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (!Auth::user()->can('eliminar_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar eventos.');
+        }
+
     }
 }

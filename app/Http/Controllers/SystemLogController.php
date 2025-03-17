@@ -11,6 +11,12 @@ class SystemLogController extends Controller
 
     public function index()
     {
+        if (!Auth::user()->can('gestionar_permisos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver Logs.');
+        }
+
+
+
         $logs = SystemLog::all();
         return view('logs.index', compact('logs'));
     }
@@ -23,6 +29,10 @@ class SystemLogController extends Controller
      */
     public function show($id)
     {
+        if (!Auth::user()->can('gestionar_permisos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver Logs.');
+        }
+
         $log = SystemLog::with('user')->findOrFail($id);
         return view('logs.show', compact('log'));
     }

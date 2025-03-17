@@ -6,7 +6,7 @@ use App\Models\BeltGrade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Auth;
 class BeltGradeController extends Controller
 {
     /**
@@ -14,6 +14,10 @@ class BeltGradeController extends Controller
      */
     public function index()
     {
+        if (!Auth::user()->can('ver_cinturones')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver cinturones.');
+        }
+
         $belts = BeltGrade::all();
         return view('belts.index', compact('belts'));
     }
@@ -23,6 +27,10 @@ class BeltGradeController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('crear_cinturones')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear cinturones.');
+        }
+
         return view('belts.create');
     }
 
@@ -31,6 +39,10 @@ class BeltGradeController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('crear_cinturones')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear cinturones.');
+        }
+
         $validator = Validator::make($request->all(), [
             'type' => 'required|string|in:KUP,POOM,DAN', 
             'level' => 'required|integer|min:1', 
@@ -82,6 +94,10 @@ class BeltGradeController extends Controller
      */
     public function show(string $id)
     {
+        if (!Auth::user()->can('ver_cinturones')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver cinturones.');
+        }
+
         $belts = BeltGrade::findOrFail($id);
         return view('belts.show', compact('belts'));
     }
@@ -91,7 +107,10 @@ class BeltGradeController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        if (!Auth::user()->can('editar_cinturones')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar cinturones.');
+        }
+
     }
 
     /**
@@ -99,6 +118,10 @@ class BeltGradeController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if (!Auth::user()->can('editar_cinturones')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar cinturones.');
+        }
+
         $validator = Validator::make($request->all(), [
             'type' => 'required|string|in:KUP,POOM,DAN',
             'level' => 'required|integer|min:1',
@@ -152,6 +175,10 @@ class BeltGradeController extends Controller
      */
     public function destroy(string $id)
     {
+        if (!Auth::user()->can('eliminar_cinturones')) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar cinturones.');
+        }
+
         try {
             DB::beginTransaction();
 

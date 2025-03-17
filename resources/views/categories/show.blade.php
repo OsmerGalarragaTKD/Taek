@@ -36,9 +36,11 @@
                     <p><strong>Descripción:</strong> {{ $category->description ?? 'N/A' }}</p>
                 </div>
                 <div class="card-footer">
+                @can('editar_categorias')
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editCategoryModal">
                         <i class="fas fa-edit"></i> Editar Categoría
                     </button>
+                    @endcan
                     <a href="{{ route('categories.index') }}" class="btn btn-default">
                         <i class="fas fa-arrow-left"></i> Volver
                     </a>

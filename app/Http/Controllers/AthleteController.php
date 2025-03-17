@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use App\Http\Controllers\SystemLogController; // Added import
-
+use Illuminate\Support\Facades\Auth;
 
 
 class AthleteController extends Controller
@@ -29,6 +29,10 @@ class AthleteController extends Controller
      */
     public function index()
     {
+        if (!Auth::user()->can('ver_atletas')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver atletas.');
+        }
+
         try {
             $athletes = Athlete::with(['currentGrade.grade', 'primaryRepresentative.representative'])
                 ->get()
@@ -49,6 +53,10 @@ class AthleteController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('crear_atletas')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear atletas.');
+        }
+
         try {
             $beltGrades = BeltGrade::orderBy('type')->orderBy('level')->get();
             $venues = Venue::where('status', 'active')->get();
@@ -64,6 +72,10 @@ class AthleteController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('crear_atletas')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear atletas.');
+        }
+
         $minDate = Carbon::now()->subYears(3)->format('Y-m-d');
         $maxDate = Carbon::now()->subYears(100)->format('Y-m-d');
 
@@ -193,6 +205,10 @@ class AthleteController extends Controller
      */
     public function show(string $id)
     {
+        if (!Auth::user()->can('ver_atletas')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver atletas.');
+        }
+
         try {
             $athlete = Athlete::with([
                 'currentGrade.grade',
@@ -218,6 +234,10 @@ class AthleteController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if (!Auth::user()->can('editar_atletas')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar atletas.');
+        }
+
         $athlete = Athlete::findOrFail($id);
         $minDateAthlete = Carbon::now()->subYears(3)->format('Y-m-d'); // Mínimo 3 años
         $maxDateAthlete = Carbon::now()->subYears(100)->format('Y-m-d'); // Máximo 100 años
@@ -374,6 +394,10 @@ class AthleteController extends Controller
      */
     public function toggleStatus(string $id)
     {
+        if (!Auth::user()->can('editar_atletas')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar atletas.');
+        }
+
         try {
             DB::beginTransaction();
 
@@ -441,6 +465,10 @@ class AthleteController extends Controller
      */
     public function destroy(string $id)
     {
+        if (!Auth::user()->can('eliminar_atletas')) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar atletas.');
+        }
+
         try {
             DB::beginTransaction();
 

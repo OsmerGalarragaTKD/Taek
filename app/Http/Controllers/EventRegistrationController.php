@@ -9,11 +9,15 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class EventRegistrationController extends Controller
 {
     public function index()
     {
+        if (!Auth::user()->can('crear_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear eventos.');
+        }
         // Obtener eventos activos (aquellos que no han pasado su fecha límite de registro)
         $activeEvents = Event::where('registration_deadline', '>=', now())->get();
 
@@ -27,6 +31,10 @@ class EventRegistrationController extends Controller
 
     public function createEvent(Event $event)
     {
+        if (!Auth::user()->can('crear_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear eventos.');
+        }
+
 
         // Verificar si el evento está activo
         if ($event->registration_deadline && $event->registration_deadline->isPast()) {
@@ -48,6 +56,10 @@ class EventRegistrationController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::user()->can('crear_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear eventos.');
+        }
+
 
         $validator = Validator::make($request->all(), [
             'event_id' => 'required|exists:events,id',
@@ -120,6 +132,10 @@ class EventRegistrationController extends Controller
 
     public function show(EventRegistration $registration)
     {
+        if (!Auth::user()->can('crear_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear eventos.');
+        }
+
         // Cargar las relaciones necesarias
         $registration->load(['event', 'athlete', 'category']);
 
@@ -129,6 +145,10 @@ class EventRegistrationController extends Controller
 
     public function destroy(EventRegistration $registration)
     {
+        if (!Auth::user()->can('eliminar_eventos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar eventos.');
+        }
+
         try {
             $registration->delete();
             SystemLogController::log(

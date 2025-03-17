@@ -36,10 +36,12 @@
                                 </h5>
                             </div>
                             <div class="col text-end">
+                            @can('crear_atletas') 
                                 <a href="{{ route('athlete.create') }}" class="btn btn-primary">
                                     <i class="bi bi-plus-circle me-1"></i>
                                     Nuevo Atleta
                                 </a>
+                            @endcan
                             </div>
                         </div>
                     </div>
@@ -146,10 +148,12 @@
                                                     class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
+                                                    @can('eliminar_atletas') 
                                                     <button type="submit" class="btn btn-sm btn-danger"
                                                         onclick="return confirm('¿Estás seguro de eliminar este registro?')">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
+                                                    @endcan
                                                 </form>
                                             </td>
                                         </tr>

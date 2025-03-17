@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PhpParser\Node\Stmt\Return_;
-
+use Illuminate\Support\Facades\Auth;
 class CategoryController extends Controller
 {
     /**
@@ -15,6 +15,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
+        if (!Auth::user()->can('ver_categorias')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver categorias.');
+        }
+
         $categories = Category::all();
         return view('categories.index', compact('categories'));
     }
@@ -24,6 +28,10 @@ class CategoryController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('crear_categorias')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear categorias.');
+        }
+
         return view('categories.create');
     }
 
@@ -32,6 +40,10 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('crear_categorias')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear categorias.');
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'type' => 'required|string',
@@ -91,6 +103,10 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
+        if (!Auth::user()->can('ver_categorias')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver categorias.');
+        }
+
         $category = Category::find($id);
         return view('categories.show', compact('category'));
     }
@@ -100,7 +116,10 @@ class CategoryController extends Controller
      */
     public function edit(string $id)
     {
-       
+        if (!Auth::user()->can('editar_categorias')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar categorias.');
+        }
+ 
     }
 
     /**
@@ -108,6 +127,10 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if (!Auth::user()->can('editar_categorias')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar categorias.');
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'type' => 'required|string',
@@ -162,6 +185,10 @@ class CategoryController extends Controller
 
     public function toggleStatus(string $id)
     {
+       // if (!Auth::user()->can('editar_categorias')) {
+       //     return redirect()->back()->with('error', 'No tienes permiso para editar categorias.');
+       // }
+
         try {
             DB::beginTransaction();
 
@@ -192,6 +219,10 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
+        if (!Auth::user()->can('eliminar_categorias')) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar categorias.');
+        }
+
         try {
             DB::beginTransaction();
 

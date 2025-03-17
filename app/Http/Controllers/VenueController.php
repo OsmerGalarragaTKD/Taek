@@ -6,6 +6,8 @@ use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth; // Ensure this import is present
 
 class VenueController extends Controller
 {
@@ -14,6 +16,10 @@ class VenueController extends Controller
      */
     public function index()
     {
+        if (!Auth::user()->can('ver_sedes')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver sedes.');
+        }
+
         $venues = Venue::all();
         return view('venues.index', compact('venues'));
     }
@@ -23,6 +29,10 @@ class VenueController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('crear_sedes')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear sedes.');
+        }
+
         return view('venues.create');
     }
 
@@ -31,6 +41,10 @@ class VenueController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('crear_sedes')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear sedes.');
+        }
+
         $rules = [
             'name' => 'required|string|max:255',
             'address_state' => 'nullable|string|max:255',
@@ -68,7 +82,6 @@ class VenueController extends Controller
                 ->withInput();
         }
 
-
         try {
             DB::beginTransaction();
 
@@ -98,7 +111,7 @@ class VenueController extends Controller
                 ->with('success', 'Sede creada exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error("Error al ingresar : ". $e->getMessage());
+            Log::error("Error al ingresar : ". $e->getMessage()); // Use Log facade
             return redirect()->back()
                 ->with('error', 'Failed to create venue');
         }
@@ -109,6 +122,10 @@ class VenueController extends Controller
      */
     public function show(string $id)
     {
+        if (!Auth::user()->can('ver_sedes')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver sedes.');
+        }
+
         $venue = Venue::findOrFail($id);
         return view('venues.show', compact('venue'));
     }
@@ -118,7 +135,12 @@ class VenueController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        if (!Auth::user()->can('editar_sedes')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar sedes.');
+        }
+
+        $venue = Venue::findOrFail($id);
+        return view('venues.edit', compact('venue'));
     }
 
     /**
@@ -126,6 +148,10 @@ class VenueController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if (!Auth::user()->can('editar_sedes')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar sedes.');
+        }
+
         $validator = Validator::make($request->all(),[
             'name' => 'required|string',
             'address_state' => 'nullable|string',
@@ -139,14 +165,11 @@ class VenueController extends Controller
             'status' => 'required|in:Active,Inactive',
         ]);
 
-
-
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-
 
         try {
             DB::beginTransaction();
@@ -179,7 +202,7 @@ class VenueController extends Controller
                 ->with('success', 'Sede actualizada exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error("Error al actualizar : ". $e->getMessage());
+            Log::error("Error al actualizar : ". $e->getMessage()); // Use Log facade
 
             return redirect()->back()
                 ->with('error', 'Fallo al actualizar Sede');
@@ -191,6 +214,19 @@ class VenueController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (!Auth::user()->can('eliminar_sedes')) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar sedes.');
+        }
+
+        try {
+            $venue = Venue::findOrFail($id);
+            $venue->delete();
+            return redirect()->route('venues.index')
+                ->with('success', 'Sede eliminada exitosamente');
+        } catch (\Exception $e) {
+            Log::error("Error al eliminar : ". $e->getMessage()); // Use Log facade
+            return redirect()->back()
+                ->with('error', 'Fallo al eliminar Sede');
+        }
     }
 }

@@ -85,10 +85,12 @@
                                             <form action="{{ route('categories.destroy', $category->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
+                                                @can('eliminar_categorias')
                                                 <button type="submit" class="btn btn-sm btn-danger" 
                                                         onclick="return confirm('¿Estás seguro de eliminar este registro?')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
+                                                @endcan
                                             </form>
                                         </td>
                                     </tr>

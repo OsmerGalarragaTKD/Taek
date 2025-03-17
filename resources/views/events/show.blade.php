@@ -6,10 +6,12 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1>Detalles del Evento: {{ $event->name }}</h1>
         <div>
+        @can('editar_eventos')
             <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#editEventModal">
                 <i class="fas fa-edit mr-1"></i>
                 Editar Evento
             </button>
+            @endcan
             <a href="{{ route('events.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left mr-1"></i>
                 Volver
@@ -132,10 +134,12 @@
     <div class="card mt-4">
         <div class="card-header">
             <h3 class="card-title">Categorías del Evento</h3>
+            @can('editar_eventos')
             <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal"
                 data-target="#editCategoriesModal">
                 <i class="fas fa-edit"></i> Editar Categorías
             </button>
+            @endcan
         </div>
         <div class="card-body">
             <table class="table table-bordered">

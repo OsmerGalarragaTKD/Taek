@@ -30,10 +30,12 @@
                                 </h5>
                             </div>
                             <div class="col text-end">
+                            @can('crear_sedes') 
                                 <a href="{{ route('venues.create') }}" class="btn btn-primary">
                                     <i class="bi bi-plus-circle me-1"></i>
                                     Nueva Sede
                                 </a>
+                            @endcan
                             </div>
                         </div>
                     </div>
@@ -89,10 +91,12 @@
                                                     class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
+                                                    @can('eliminar_sedes')
                                                     <button type="submit" class="btn btn-sm btn-danger"
                                                         onclick="return confirm('¿Estás seguro de eliminar esta sede?')">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
+                                                    @endcan
                                                 </form>
                                             </td>
                                         </tr>
@@ -102,11 +106,13 @@
                                                 <div class="d-flex flex-column align-items-center">
                                                     <i class="bi bi-building-x text-muted" style="font-size: 2rem;"></i>
                                                     <p class="mb-0 mt-2">No hay sedes registradas</p>
+                                                    
                                                     <a href="{{ route('venues.create') }}"
                                                         class="btn btn-sm btn-primary mt-3">
                                                         <i class="bi bi-plus-circle me-1"></i>
                                                         Crear Nueva Sede
                                                     </a>
+                                                    
                                                 </div>
                                             </td>
                                         </tr>

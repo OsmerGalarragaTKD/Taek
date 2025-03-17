@@ -14,6 +14,7 @@ class RoleController extends Controller
 {
     public function index()
     {
+        
         try {
             $roles = Role::with('permissions')->get();
             $users = User::all();

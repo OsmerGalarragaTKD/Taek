@@ -30,10 +30,12 @@
                             </h5>
                         </div>
                         <div class="col text-end">
+                        @can('editar_cinturones')
                             <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editModal">
                                 <i class="bi bi-pencil-square me-1"></i>
                                 Editar
                             </button>
+                            @endcan
                             <a href="{{ route('belts.index') }}" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>
                                 Volver

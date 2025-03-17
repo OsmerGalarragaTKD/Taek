@@ -17,12 +17,20 @@ class PaymentController extends Controller
 {
     public function index()
     {
+        if (!Auth::user()->can('ver_pagos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver pagos.');
+        }
+
         $payments = Payment::with(['athlete', 'event'])->latest()->paginate(15);
         return view('payments.index', compact('payments'));
     }
 
     public function create()
     {
+        if (!Auth::user()->can('crear_pagos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear pagos.');
+        }
+
         $athletes = Athlete::all();
         $events = Event::where('status', 'Planned')->get();
         return view('payments.create', compact('athletes', 'events'));
@@ -119,6 +127,10 @@ class PaymentController extends Controller
 
     public function pending()
     {
+        if (!Auth::user()->can('editar_pagos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar pagos.');
+        }
+
         $payments = Payment::where('status', 'Pending')
             ->with('athlete')
             ->get();
@@ -246,12 +258,20 @@ class PaymentController extends Controller
 
     public function show(string $id)
     {
+        if (!Auth::user()->can('ver_pagos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver pagos.');
+        }
+
         $pago = Payment::with(['athlete', 'event'])->findOrFail($id);
         return view('payments.show', compact('pago'));
     }
 
     public function update(Request $request, string $id)
     {
+        if (!Auth::user()->can('editar_pagos')) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar pagos.');
+        }
+
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
@@ -395,6 +415,9 @@ class PaymentController extends Controller
 
     public function userPayment()
     {
+   //     if (!Auth::user()->can('usuarios_pagos')) {
+   //         return redirect()->back()->with('error', 'No tienes permiso para ver usuarios pagos.');
+   //     }
         $events = Event::where('status', 'Planned')->get();
         return view('payments.user-payment', compact('events'));
     }

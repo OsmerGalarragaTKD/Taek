@@ -73,10 +73,13 @@
                                             <form action="{{ route('belts.destroy', $belt->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
+
+                                                @can('eliminar_cinturones')
                                                 <button type="submit" class="btn btn-sm btn-danger" 
                                                         onclick="return confirm('¿Estás seguro de eliminar este grado?')">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
+                                                @endcan
                                             </form>
                                         </td>
                                     </tr>

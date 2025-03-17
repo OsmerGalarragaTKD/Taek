@@ -63,11 +63,13 @@
                                             title="Ver detalles">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        @can('eliminar_eventos')
 
                                         <button type="button" class="btn btn-sm btn-danger"
                                             onclick="confirmarEliminacion('{{ $event->id }}')" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </button>
+                                        @endcan
                                     </div>
                                     <form id="delete-form-{{ $event->id }}"
                                         action="{{ route('events.destroy', $event->id) }}" method="POST"

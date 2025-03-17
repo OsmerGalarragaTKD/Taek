@@ -3,6 +3,7 @@
         <h3 class="card-title">Acciones</h3>
     </div>
     <div class="card-body">
+    @can('editar_pagos')
         <button type="button" 
                 class="btn btn-warning btn-block mb-3" 
                 data-toggle="modal" 
@@ -10,6 +11,7 @@
             <i class="fas fa-edit mr-1"></i>
             Editar Pago
         </button>
+        @endcan
 
         @if($pago->status === 'Pending')
             <form action="{{ route('payments.approve-single', $pago->id) }}" method="POST">

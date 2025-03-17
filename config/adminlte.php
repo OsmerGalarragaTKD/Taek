@@ -365,7 +365,7 @@ return [
             'text' => 'Logs',
             'url' => 'logs',
             'icon' => 'fas fa-users',
-            //'can' => 'gestionar_permisos'
+            'can' => 'gestionar_permisos'
         ],
         [
             'text' => 'Manual JJR',
@@ -378,6 +378,17 @@ return [
                 'icon' => 'fas fa-download'
             ]
         ],
+       // [
+       //     'text' => 'Plan JJR',
+       //     'url' => '/apoyo/download/planjjr.pdf',
+       //     'icon' => 'fas fa-file-pdf',
+       //     'target' => '_blank',
+       //     'download' => [
+       //         'text' => 'Descargar planjjr.pdf',
+       //         'url' => '/apoyo/download/planjjr.pdf',
+       //         'icon' => 'fas fa-download'
+       //     ]
+       // ],
 
         
         

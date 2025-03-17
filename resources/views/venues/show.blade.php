@@ -14,10 +14,12 @@
                             </h5>
                         </div>
                         <div class="col text-end">
+                        @can('editar_sedes')
                             <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editVenueModal">
                                 <i class="bi bi-pencil me-1"></i>
                                 Editar
                             </button>
+                            @endcan
                             <a href="{{ route('venues.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>
                                 Volver
