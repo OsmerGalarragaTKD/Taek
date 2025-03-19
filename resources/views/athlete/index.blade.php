@@ -49,13 +49,13 @@
                     <div class="card-body">
                         <!-- Botones de exportación explícitos -->
                         <div class="export-buttons mb-3">
-                            <button class="btn btn-success btn-sm export-excel">
+                            <button id="export-excel" class="btn btn-success btn-sm">
                                 <i class="fas fa-file-excel mr-1"></i> Excel
                             </button>
-                            <button class="btn btn-danger btn-sm export-pdf">
+                            <button id="export-pdf" class="btn btn-danger btn-sm">
                                 <i class="fas fa-file-pdf mr-1"></i> PDF
                             </button>
-                            <button class="btn btn-info btn-sm export-print">
+                            <button id="export-print" class="btn btn-info btn-sm">
                                 <i class="fas fa-print mr-1"></i> Imprimir
                             </button>
                         </div>
@@ -188,7 +188,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         <!-- DataTables CSS -->
         <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css')}}">
-        <link rel="stylesheet" href="{{asset('css/buttons.bootstrap4.min.css')}}">
+        <link rel="stylesheet" href="{{ asset('css/buttons.bootstrap4.min.css')}}">
         
         <style>
             .avatar-sm {
@@ -245,74 +245,70 @@
     @endpush
 
     @push('js')
-        <!-- DataTables JS -->
-        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-        <script src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
-        <script src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
-        <script src="{{ asset('js/buttons.bootstrap4.min.js') }}"></script>
-        <script src="{{ asset('js/jszip.min.js') }}"></script>
-        <script src="{{ asset('js/pdfmake.min.js') }}"></script>
-        <script src="{{ asset('js/vfs_fonts.js') }}"></script>
-        <script src="{{ asset('js/buttons.html5.min.js') }}"></script>
-        <script src="{{ asset('js/buttons.print.min.js') }}"></script>
+        <!-- jsPDF -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+        <!-- AutoTable plugin for jsPDF -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
         
         <script>
-            $(document).ready(function() {
-                // Inicializar DataTable
-                var table = $('#athleteTable').DataTable({
-                    "language": {
-                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
-                    },
-                    buttons: [
-                        {
-                            extend: 'excel',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6]
-                            },
-                            title: 'Listado de Atletas'
-                        },
-                        {
-                            extend: 'pdf',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6]
-                            },
-                            title: 'Listado de Atletas'
-                        },
-                        {
-                            extend: 'print',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6]
-                            },
-                            title: 'Listado de Atletas'
-                        }
-                    ],
-                    "pageLength": 25,
-                    "order": [[0, 'asc']]
-                });
-                
-                // Conectar botones personalizados con las funciones de DataTables
-                $('.export-excel').on('click', function() {
-                    table.button('.buttons-excel').trigger();
-                });
-                
-                $('.export-pdf').on('click', function() {
-                    table.button('.buttons-pdf').trigger();
-                });
-                
-                $('.export-print').on('click', function() {
-                    table.button('.buttons-print').trigger();
-                });
+            // Función para imprimir
+            function printTable() {
+                var table = document.getElementById('athleteTable');
+                var rows = table.rows;
+                for (var i = 0; i < rows.length; i++) {
+                    var cells = rows[i].cells;
+                    cells[cells.length - 1].style.display = 'none';
+                    cells[cells.length - 2].style.display = 'none';
+                }
+                var html = table.outerHTML;
+                var printWindow = window.open('', '', 'height=500,width=800');
+                printWindow.document.write(html);
+                printWindow.document.close();
+                printWindow.print();
+                printWindow.close();
+                // Restaurar la tabla a su estado original
+                for (var i = 0; i < rows.length; i++) {
+                    var cells = rows[i].cells;
+                    cells[cells.length - 1].style.display = '';
+                    cells[cells.length - 2].style.display = '';
+                }
+            }
 
-                // Auto-cerrar alertas después de 5 segundos
-                window.setTimeout(function() {
-                    document.querySelectorAll(".alert").forEach(function(alert) {
-                        var bsAlert = new bootstrap.Alert(alert);
-                        setTimeout(function() {
-                            bsAlert.close();
-                        }, 5000);
-                    });
-                }, 1000);
-            });
+            // Función para exportar a Excel
+            function exportToExcel() {
+                var table = document.getElementById('athleteTable');
+                var rows = table.rows;
+                for (var i = 0; i < rows.length; i++) {
+                    var cells = rows[i].cells;
+                    cells[cells.length - 1].style.display = 'none';
+                    cells[cells.length - 2].style.display = 'none';
+                }
+                var html = table.outerHTML;
+                var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'listado_atletas.xls';
+                a.click();
+                // Restaurar la tabla a su estado original
+                for (var i = 0; i < rows.length; i++) {
+                    var cells = rows[i].cells;
+                    cells[cells.length - 1].style.display = '';
+                    cells[cells.length - 2].style.display = '';
+                }
+            }
+
+            // Función para exportar a PDF
+            function exportToPdf() {
+                var { jsPDF } = window.jspdf;
+                var doc = new jsPDF();
+                doc.autoTable({ html: '#athleteTable' });
+                doc.save('listado_atletas.pdf');
+            }
+
+            // Agregar eventos a los botones de exportación
+            document.getElementById('export-excel').addEventListener('click', exportToExcel);
+            document.getElementById('export-pdf').addEventListener('click', exportToPdf);
+            document.getElementById('export-print').addEventListener('click', printTable);
         </script>
     @endpush
 @endsection
