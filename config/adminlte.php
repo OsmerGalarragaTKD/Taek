@@ -378,17 +378,17 @@ return [
                 'icon' => 'fas fa-download'
             ]
         ],
-       // [
-       //     'text' => 'Plan JJR',
-       //     'url' => '/apoyo/download/planjjr.pdf',
-       //     'icon' => 'fas fa-file-pdf',
-       //     'target' => '_blank',
-       //     'download' => [
-       //         'text' => 'Descargar planjjr.pdf',
-       //         'url' => '/apoyo/download/planjjr.pdf',
-       //         'icon' => 'fas fa-download'
-       //     ]
-       // ],
+        [
+            'text' => 'Plan JJR',
+            'url' => '/apoyo/download/planjjr.pdf',
+            'icon' => 'fas fa-file-pdf',
+            'target' => '_blank',
+            'download' => [
+                'text' => 'Descargar planjjr.pdf',
+                'url' => '/apoyo/download/planjjr.pdf',
+                'icon' => 'fas fa-download'
+            ]
+        ],
 
         
         
