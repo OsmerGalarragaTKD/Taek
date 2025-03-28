@@ -147,6 +147,7 @@
             <div class="modal-content">
                 <form id="assignRoleForm" method="POST">
                     @csrf
+                    <meta name="csrf-token" content="{{ csrf_token() }}">
 
                     <div class="modal-header">
                         <h5 class="modal-title" id="assignRoleModalLabel">Asignar Roles</h5>
@@ -191,7 +192,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        <button type="submit" class="btn btn-primary" id="saveChangesButton">Guardar cambios</button>
                     </div>
                 </form>
             </div>
@@ -200,6 +201,7 @@
 @endsection
 
 @push('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const assignRoleModal = document.getElementById('assignRoleModal');
@@ -246,15 +248,23 @@
                             roles: Array.from(selectedRoles).map(cb => cb.value)
                         })
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log(response);
+                        if (!response.ok) {
+                            throw new Error('Error en la solicitud');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Éxito',
-                                text: data.message
+                                text: data.message,
+                                timer: 5000, // Duración del mensaje en milisegundos (5 segundos)
+                                timerProgressBar: true // Muestra una barra de progreso mientras el mensaje está visible
                             }).then(() => {
-                                window.location.reload();
+                                window.location.reload(); // Recargar la página después de guardar los cambios
                             });
                         } else {
                             throw new Error(data.message || 'Error al asignar roles');
@@ -270,4 +280,84 @@
             });
         });
     </script>
+@endpush
+@push('js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const assignRoleModal = document.getElementById('assignRoleModal');
+        const assignRoleForm = document.getElementById('assignRoleForm');
+
+        assignRoleModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const userId = button.getAttribute('data-user-id');
+            const userName = button.getAttribute('data-user-name');
+            const userRoles = JSON.parse(button.getAttribute('data-user-roles'));
+
+            // Actualizar el formulario y contenido del modal
+            assignRoleForm.action = `/roles/assign/${userId}`;
+            document.getElementById('modalUserName').textContent = userName;
+
+            // Resetear y marcar los checkboxes correspondientes
+            document.querySelectorAll('.role-checkbox').forEach(checkbox => {
+                checkbox.checked = userRoles.includes(parseInt(checkbox.value));
+            });
+        });
+
+        // Manejar el envío del formulario
+        assignRoleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const selectedRoles = document.querySelectorAll('.role-checkbox:checked');
+            if (selectedRoles.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Por favor, seleccione al menos un rol'
+                });
+                return;
+            }
+
+            // Enviar el formulario usando fetch
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    roles: Array.from(selectedRoles).map(cb => cb.value)
+                })
+            })
+            .then(response => {
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Error en la solicitud');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: data.message,
+                        timer: 5000, // Duración del mensaje en milisegundos (5 segundos)
+                        timerProgressBar: true // Muestra una barra de progreso mientras el mensaje está visible
+                    }).then(() => {
+                        window.location.reload(); // Recargar la página después de guardar los cambios
+                    });
+                } else {
+                    throw new Error(data.message || 'Error al asignar roles');
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message
+                });
+            });
+        });
+    });
+</script>
 @endpush

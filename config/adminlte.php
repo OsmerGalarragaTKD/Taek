@@ -378,7 +378,7 @@ return [
                 'icon' => 'fas fa-download'
             ]
         ],
-        [
+   /*     [
             'text' => 'Plan JJR',
             'url' => '/apoyo/download/planjjr.pdf',
             'icon' => 'fas fa-file-pdf',
@@ -389,7 +389,7 @@ return [
                 'icon' => 'fas fa-download'
             ]
         ],
-
+*/
         
         
     ],
