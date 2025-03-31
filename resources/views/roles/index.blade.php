@@ -280,7 +280,7 @@
             });
         });
     </script>
-@endpush
+@endpush 
 @push('js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
