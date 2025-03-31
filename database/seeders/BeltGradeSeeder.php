@@ -19,34 +19,37 @@ class BeltGradeSeeder extends Seeder
     }
 
 
-    private function createKupGrades()
-    {
-        for ($i = 0; $i <= 10; $i++) {  
-            $kup = [  
-                'BLANCO',  
-                'PUNTA AMARILLA',  
-                'AMARILLO',  
-                'NARANJA',  
-                'VERDE',  
-                'CELESTE',  
-                'AZUL',  
-                'MARRÓN',  
-                'ROJO',  
-                'ROJO 1 PUNTA NEGRA',  
-                'ROJO 2 PUNTA NEGRA'  
-            ];  
-            BeltGrade::create([  
-                'type' => 'KUP',  
-                'level' => $i + 1,  
-                'name' => "Kup",  
-                'color' => $kup[$i]  
-            ]);  
-        }
+  private function createKupGrades()
+{
+    $kup = [
+        'BLANCO',  
+        'PUNTA AMARILLA',  
+        'AMARILLO',  
+        'NARANJA',  
+        'VERDE',  
+        'CELESTE',  
+        'AZUL',  
+        'MARRÓN',  
+        'ROJO',  
+        'ROJO 1 PUNTA NEGRA',  
+        'ROJO 2 PUNTA NEGRA'  
+    ];
+
+    $kup = array_reverse($kup);
+
+    for ($i = 0; $i <= 10; $i++) {  
+        BeltGrade::create([  
+            'type' => 'KUP',  
+            'level' => $i + 1,  
+            'name' => "Kup",  
+            'color' => $kup[$i]  
+        ]);  
     }
+}
 
     private function createPoomGrades()
     {
-        for ($i = 1; $i <= 4; $i++) {
+        for ($i = 1; $i <= 3; $i++) {
             BeltGrade::create([
                 'type' => 'POOM',
                 'level' => $i,
@@ -58,7 +61,7 @@ class BeltGradeSeeder extends Seeder
 
     private function createDanGrades()
     {
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 9; $i++) {
             BeltGrade::create([
                 'type' => 'DAN',
                 'level' => $i,

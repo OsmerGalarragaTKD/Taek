@@ -368,7 +368,7 @@ return [
             'can' => 'gestionar_permisos'
         ],
         [
-            'text' => 'Manual JJR',
+            'text' => 'Manual',
             'url' => '/apoyo/download/manualjjr.pdf',
             'icon' => 'fas fa-file-pdf',
             'target' => '_blank',
@@ -379,7 +379,7 @@ return [
             ]
         ],
    /*     [
-            'text' => 'Plan JJR',
+            'text' => 'Plan',
             'url' => '/apoyo/download/planjjr.pdf',
             'icon' => 'fas fa-file-pdf',
             'target' => '_blank',
