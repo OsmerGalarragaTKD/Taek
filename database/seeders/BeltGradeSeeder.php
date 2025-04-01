@@ -35,7 +35,7 @@ class BeltGradeSeeder extends Seeder
         'ROJO 2 PUNTA NEGRA'  
     ];
 
-    $kup = array_reverse($kup);
+  //  $kup = array_reverse($kup);
 
     for ($i = 0; $i <= 10; $i++) {  
         BeltGrade::create([  

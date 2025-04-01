@@ -328,7 +328,7 @@
                                             <span class="fs-6">
                                                 @if($athlete->venue)
                                                     {{ $athlete->venue->name }} 
-                                                    <small class="text-muted">({{ $athlete->venue->address_city }})</small>
+                                                    <small class="text-muted">{{ $athlete->venue->address_city }}</small>
                                                 @else
                                                     No asignada
                                                 @endif
