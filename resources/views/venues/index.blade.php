@@ -176,6 +176,8 @@
         <!-- AutoTable plugin for jsPDF -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
         
+        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+
         <script>
             // Función para imprimir
             function printTable() {
@@ -235,6 +237,15 @@
             document.getElementById('export-excel').addEventListener('click', exportToExcel);
             document.getElementById('export-pdf').addEventListener('click', exportToPdf);
             document.getElementById('export-print').addEventListener('click', printTable);
+
+            $(document).ready(function() {
+                $('#venuesTable').DataTable({
+                    dom: 'Bfrtip', // Configuración de elementos visibles en la tabla
+                    buttons: [
+                        // Botones de exportación (comentados en este caso)
+                    ],
+                });
+            });
         </script>
     @endpush
 @endsection

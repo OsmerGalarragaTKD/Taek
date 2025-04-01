@@ -180,7 +180,10 @@
             </div>
         </div>
     </div>
-
+    @section('css')
+    <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}">
+    @stop
+    
     @push('css')
         <!-- Bootstrap Icons -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -249,7 +252,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
         <!-- AutoTable plugin for jsPDF -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
-        
+        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+
         <script>
             // Función para imprimir
             function printTable() {
@@ -309,6 +313,15 @@
             document.getElementById('export-excel').addEventListener('click', exportToExcel);
             document.getElementById('export-pdf').addEventListener('click', exportToPdf);
             document.getElementById('export-print').addEventListener('click', printTable);
+
+                        $(document).ready(function() {
+                $('#athleteTable').DataTable({
+                    dom: 'Bfrtip', // Configuración de elementos visibles en la tabla
+                    buttons: [
+                        // Botones de exportación (comentados en este caso)
+                    ],
+                });
+            });
         </script>
     @endpush
 @endsection
