@@ -253,7 +253,11 @@
         <!-- AutoTable plugin for jsPDF -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
         <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-
+        <!-- jQuery -->
+        <--script src="https://code.jquery.com/jquery-3.6.0.min.js"><-/script>
+        <!-- DataTables JS -->
+        <--script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"><-/script>
+        
         <script>
             // Función para imprimir
             function printTable() {
@@ -314,14 +318,47 @@
             document.getElementById('export-pdf').addEventListener('click', exportToPdf);
             document.getElementById('export-print').addEventListener('click', printTable);
 
-                        $(document).ready(function() {
-                $('#athleteTable').DataTable({
-                    dom: 'Bfrtip', // Configuración de elementos visibles en la tabla
-                    buttons: [
-                        // Botones de exportación (comentados en este caso)
-                    ],
-                });
-            });
+     
+    $(document).ready(function() {
+    // Verifica que el elemento con ID 'athleteTable' exista antes de inicializar DataTables
+    if ($('#athleteTable').length) {
+        $('#athleteTable').DataTable({
+            "language": {
+                "sProcessing":     "Procesando...",
+                "sLengthMenu":     "Mostrar _MENU_ registros",
+                "sZeroRecords":    "No se encontraron resultados",
+                "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                "sSearch":         "Buscar:",
+                "oPaginate": {
+                    "sFirst":    "Primero",
+                    "sLast":     "Último",
+                    "sNext":     "Siguiente",
+                    "sPrevious": "Anterior"
+                }
+            },
+            "responsive": true,
+            "autoWidth": false,
+            "order": [[0, 'asc']],
+            "pageLength": 10,
+            "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                   '<"row"<"col-sm-12"tr>>' +
+                   '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            "columnDefs": [
+                {
+                    "targets": -1, // Última columna (acciones)
+                    "orderable": false // No permitir ordenar
+                }
+            ]
+        });
+    } else {
+        console.error("La tabla con ID 'athleteTable' no existe en el DOM.");
+    }
+});
+ 
         </script>
-    @endpush
+       
+@endpush
 @endsection

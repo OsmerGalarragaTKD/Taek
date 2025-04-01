@@ -78,8 +78,75 @@
 @section('js')
     <script>
         $(document).ready(function() {
-            // You can add DataTables initialization here if needed
-            $('#logs-table').DataTable();
+            // Verifica que el elemento con ID 'logs-table' exista antes de inicializar DataTables
+            if ($('#logs-table').length) {
+                $('#logs-table').DataTable({
+                    "language": {
+                        "sProcessing":     "Procesando...",
+                        "sLengthMenu":     "Mostrar _MENU_ registros",
+                        "sZeroRecords":    "No se encontraron resultados",
+                        "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                        "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                        "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                        "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                        "sSearch":         "Buscar:",
+                        "oPaginate": {
+                            "sFirst":    "Primero",
+                            "sLast":     "Último",
+                            "sNext":     "Siguiente",
+                            "sPrevious": "Anterior"
+                        }
+                    },
+                    "responsive": true,
+                    "autoWidth": false,
+                    "order": [[2, 'desc']], // Ordenar por la columna de fecha en orden descendente
+                    "pageLength": 10,
+                    // Combina la disposición personalizada con los botones de exportación y el selector de registros
+                    "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                   '<"row"<"col-sm-12"tr>>' +
+                   '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+          
+                  
+                  /*  "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"B>>' +
+                           '<"row"<"col-sm-12"f>>' +
+                           '<"row"<"col-sm-12"tr>>' +
+                           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                  */  /* "buttons": [
+                        {
+                            extend: 'excel',
+                            text: '<i class="fas fa-file-excel mr-1"></i> Excel',
+                            className: 'btn btn-success btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6] // Columnas a exportar
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
+                            className: 'btn btn-danger btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6] // Columnas a exportar
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: '<i class="fas fa-print mr-1"></i> Imprimir',
+                            className: 'btn btn-info btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6] // Columnas a exportar
+                            }
+                        }
+                    ], */
+                    "columnDefs": [
+                        {
+                            "targets": -1, // Última columna (acciones)
+                            "orderable": false // No permitir ordenar
+                        }
+                    ]
+                });
+            } else {
+                console.error("La tabla con ID 'logs-table' no existe en el DOM.");
+            }
         });
     </script>
 @stop

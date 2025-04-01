@@ -239,12 +239,42 @@
             document.getElementById('export-print').addEventListener('click', printTable);
 
             $(document).ready(function() {
-                $('#venuesTable').DataTable({
-                    dom: 'Bfrtip', // Configuración de elementos visibles en la tabla
-                    buttons: [
-                        // Botones de exportación (comentados en este caso)
-                    ],
-                });
+                // Verifica que el elemento con ID 'venuesTable' exista antes de inicializar DataTables
+                if ($('#venuesTable').length) {
+                    $('#venuesTable').DataTable({
+                        "language": {
+                            "sProcessing":     "Procesando...",
+                            "sLengthMenu":     "Mostrar _MENU_ registros",
+                            "sZeroRecords":    "No se encontraron resultados",
+                            "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                            "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                            "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                            "sSearch":         "Buscar:",
+                            "oPaginate": {
+                                "sFirst":    "Primero",
+                                "sLast":     "Último",
+                                "sNext":     "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        "responsive": true,
+                        "autoWidth": false,
+                        "order": [[0, 'asc']],
+                        "pageLength": 10,
+                        "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                               '<"row"<"col-sm-12"tr>>' +
+                               '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                        "columnDefs": [
+                            {
+                                "targets": -1, // Última columna (acciones)
+                                "orderable": false // No permitir ordenar
+                            }
+                        ]
+                    });
+                } else {
+                    console.error("La tabla con ID 'venuesTable' no existe en el DOM.");
+                }
             });
         </script>
     @endpush

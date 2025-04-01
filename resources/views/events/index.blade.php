@@ -104,34 +104,70 @@
 
     <script>
         $(document).ready(function() {
-            $('#events-table').DataTable({
-                dom: 'Bfrtip',
-                buttons: [{
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel mr-1"></i> Excel',
-                        className: 'btn btn-success btn-sm',
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5]
+            // Verifica que el elemento con ID 'events-table' exista antes de inicializar DataTables
+            if ($('#events-table').length) {
+                $('#events-table').DataTable({
+                    "language": {
+                        "sProcessing":     "Procesando...",
+                        "sLengthMenu":     "Mostrar _MENU_ registros",
+                        "sZeroRecords":    "No se encontraron resultados",
+                        "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                        "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                        "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                        "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                        "sSearch":         "Buscar:",
+                        "oPaginate": {
+                            "sFirst":    "Primero",
+                            "sLast":     "Último",
+                            "sNext":     "Siguiente",
+                            "sPrevious": "Anterior"
                         }
                     },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
-                        className: 'btn btn-danger btn-sm',
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5]
+                    "responsive": true,
+                    "autoWidth": false,
+                    "order": [[0, 'asc']],
+                    "pageLength": 10,
+                    // Combina la disposición personalizada con los botones de exportación y el selector de registros
+                    "dom": '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+                           '<"row"<"col-sm-12"l>>' +
+                           '<"row"<"col-sm-12"tr>>' +
+                           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                    "buttons": [
+                        {
+                            extend: 'excel',
+                            text: '<i class="fas fa-file-excel mr-1"></i> Excel',
+                            className: 'btn btn-success btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5] // Columnas a exportar
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
+                            className: 'btn btn-danger btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5] // Columnas a exportar
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: '<i class="fas fa-print mr-1"></i> Imprimir',
+                            className: 'btn btn-info btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5] // Columnas a exportar
+                            }
                         }
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print mr-1"></i> Imprimir',
-                        className: 'btn btn-info btn-sm',
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5]
+                    ],
+                    "columnDefs": [
+                        {
+                            "targets": -1, // Última columna (acciones)
+                            "orderable": false // No permitir ordenar
                         }
-                    }
-                ],
-            });
+                    ]
+                });
+            } else {
+                console.error("La tabla con ID 'events-table' no existe en el DOM.");
+            }
         });
 
         function confirmarEliminacion(eventId) {

@@ -136,45 +136,72 @@
     <script src="{{ asset('js/buttons.print.min.js') }}"></script>
 
     <script>
-        $(document).ready(function() {
-            $('#payments-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json'
-                },
-                dom: 'Bfrtip',
-                buttons: [{
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel mr-1"></i> Excel',
-                        className: 'btn btn-success btn-sm',
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
+      
+                $(document).ready(function() {
+            // Verifica que el elemento con ID 'payments-table' exista antes de inicializar DataTables
+            if ($('#payments-table').length) {
+                $('#payments-table').DataTable({
+                    "language": {
+                        "sProcessing":     "Procesando...",
+                        "sLengthMenu":     "Mostrar _MENU_ registros",
+                        "sZeroRecords":    "No se encontraron resultados",
+                        "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                        "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                        "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                        "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                        "sSearch":         "Buscar:",
+                        "oPaginate": {
+                            "sFirst":    "Primero",
+                            "sLast":     "Último",
+                            "sNext":     "Siguiente",
+                            "sPrevious": "Anterior"
                         }
                     },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
-                        className: 'btn btn-danger btn-sm',
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
+                    "responsive": true,
+                    "autoWidth": false,
+                    "order": [[2, 'desc']], // Ordenar por la columna de fecha en orden descendente
+                    "pageLength": 10,
+                    // Combina la disposición personalizada con los botones de exportación y el selector de registros
+                    "dom": '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+                           '<"row"<"col-sm-12"l>>' +
+                           '<"row"<"col-sm-12"tr>>' +
+                           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                    "buttons": [
+                        {
+                            extend: 'excel',
+                            text: '<i class="fas fa-file-excel mr-1"></i> Excel',
+                            className: 'btn btn-success btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6] // Columnas a exportar
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
+                            className: 'btn btn-danger btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6] // Columnas a exportar
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: '<i class="fas fa-print mr-1"></i> Imprimir',
+                            className: 'btn btn-info btn-sm',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6] // Columnas a exportar
+                            }
                         }
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print mr-1"></i> Imprimir',
-                        className: 'btn btn-info btn-sm',
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
+                    ],
+                    "columnDefs": [
+                        {
+                            "targets": -1, // Última columna (acciones)
+                            "orderable": false // No permitir ordenar
                         }
-                    }
-                ],
-                order: [
-                    [2, 'desc']
-                ],
-                columnDefs: [{
-                    targets: [-1],
-                    orderable: false
-                }]
-            });
+                    ]
+                });
+            } else {
+                console.error("La tabla con ID 'payments-table' no existe en el DOM.");
+            }
         });
 
         // Auto-cerrar alertas después de 5 segundos
