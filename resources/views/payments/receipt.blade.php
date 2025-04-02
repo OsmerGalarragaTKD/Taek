@@ -65,7 +65,7 @@
                         @if($payment->payment_type === 'Monthly_Fee')
                         Mensualidad - {{ $payment->month ? $payment->month->format('m Y') : 'N/A' }}
                         @elseif($payment->payment_type === 'Event_Registration')
-                            Inscripción - {{ $payment->event->name }}
+                            Inscripción - {{ $payment->event ? $payment->event->name : 'Evento no encontrado' }}
                         @endif
                     </td>
                     <td>${{ number_format($payment->amount, 2) }}</td>
