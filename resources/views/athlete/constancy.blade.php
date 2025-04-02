@@ -99,27 +99,25 @@
 </head>
 <body>
     <!-- Encabezado con logo y texto -->
-    <div class="header">
-        <!-- Logo a la izquierda -->
-        <img src="{{ public_path('img/taek.jpg') }}" alt="Logo" class="logo">
-        <!-- Encabezado a la derecha -->
-        <div>
-            <div class="school-name">
-                ESCUELA DE TAE-KWON-DO<br>
-                "JUAN JOSÉ ROJAS"
-            </div>
-            <div class="contact-info">
-                0412-0911798 / 0424-8667823<br>
-                COMPLEJO POLIDEPORTIVO SIMÓN BOLÍVAR,<br>
-                AV INTERCOMUNAL, BNA, EDO ANZOÁTEGUI<br>
-                juanjosertkd@gmail.com / camposmillanc@gmail.com<br>
+    <div class="header" style="padding-bottom: 10px; margin-bottom: 20px; overflow: hidden;">
+        <!-- Logo alineado a la izquierda -->
+        <img src="{{ public_path('img/taek.jpg') }}" alt="Logo de la escuela" class="logo" style="border-radius: 10px; float: left; width: 100px; margin-right: 20px;">
+        <!-- Contenedor para el texto -->
+        <div style="overflow: hidden;">
+            <!-- Nombre de la escuela centrado -->
+            <div class="school-name" style="font-size: 20px; color: #333; font-weight: bold; text-align: center;">ESCUELA DE TAEKWONDO "JUAN JOSÉ ROJAS"</div>
+            <!-- Información de contacto alineada a la izquierda -->
+            <div class="contact-info" style="font-size: 10px; color: #555; text-align: left; margin-top: 5px;">
+                Teléfonos: 0412-0911798 / 0424-8667823<br>
+                Dirección: COMPLEJO POLIDEPORTIVO SIMÓN BOLÍVAR, AV INTERCOMUNAL, BNA, EDO ANZOÁTEGUI<br>
+                Correos: juanjosertkd@gmail.com / camposmillanc@gmail.com<br>
                 RIF: V-06643926-3
             </div>
-            <div class="affiliations">
-                AFILIADA A LA ESCUELA DE ARTES MARCIALES HONG KI KIM DE PUERTO LA CRUZ<br>
-                INSCRITA EN I.N.D, EL IDANZ, LA F.V.T Y LA ASOCIACIÓN DE TAE-KWON-DO DEL EDO ANZOÁTEGUI
-            </div>
         </div>
+    </div>
+    <div class="affiliations" style="font-size: 8px; font-style: italic; padding-top: 2px; margin-top: 2px; text-align: center; border-top: 1px solid #000; text-transform: uppercase;">
+        <p><strong>Afiliada a la Escuela de Artes Marciales Hong Ki Kim de Puerto La Cruz</strong></p>
+        <p><strong>Inscrita en I.N.D, el IDANZ, la F.V.T y la Asociación de Tae-Kwon-Do del Edo. Anzoátegui</strong></p>
     </div>
 
     <!-- Título de la constancia -->
