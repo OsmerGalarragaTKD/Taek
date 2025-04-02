@@ -25,9 +25,12 @@
             </form>
         @endif
 
-        <!-- Only show the Generate Receipt button if payment status is Completed -->
+        <!-- Mostrar el botón Generar Recibo solo si el estado del pago es Completed -->
         @if(in_array($pago->payment_type, ['Monthly_Fee', 'Event_Registration']) && $pago->status === 'Completed')
-            <a href="{{ route('payments.receipt', $pago->id) }}" class="btn btn-info btn-block mb-3">
+            <a href="{{ route('payments.receipt', $pago->id) }}" 
+               class="btn btn-info btn-block mb-3" 
+               target="_blank" 
+               rel="noopener noreferrer">
                 <i class="fas fa-file-pdf mr-1"></i>
                 Generar Recibo
             </a>
